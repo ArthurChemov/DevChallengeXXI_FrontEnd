@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1 id="title">Data visualisation tool</h1>
+        <button id="themeToggle" class="theme-toggle" type="button">Light Mode</button>
+    </header>
+
+    <main>
+        <section id="drop-zone" class="drop-zone">
+            <label for="fileInput" id="file-input">Drag and drop your file here</label>
+            <input type="file" id="fileInput" class="file-input" accept=".csv, .xlsx, .xls, .json" />
+            <div class="file-input-wrapper">
+                <label for="upload" id="file-label">Select a file (CSV, Excel, JSON)</label>
+                <input type="file" id="upload" accept=".csv, .xlsx, .xls, .json" />
+            </div>
+        </section>
+
+        <section id="manual-input-wrapper" class="manual-input-wrapper">
+            <input type="text" id="manualInput" class="manual-input" placeholder="Enter data manually..." />
+            <button id="submitManualInput" type="button">Submit</button>
+        </section>
+
+        <section id="chart-type-wrapper" class="chart-type-wrapper">
+            <label for="chartType">Select chart type:</label>
+            <select id="chartType" class="chart-type">
+                <option value="line">Line Chart</option>
+                <option value="bar">Bar Chart</option>
+                <option value="pie">Pie Chart</option>
+            </select>
+            <button id="createChart" type="button" class="create-chart-button">Create Chart</button>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
