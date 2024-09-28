@@ -58,10 +58,11 @@ main {
 .file-input-wrapper label {
     display: inline-block;
     padding: 10px;
-    background-color: #9e9e9e;
+    background-color: #fff;
     cursor: pointer;
     border-radius: 5px;
     color: #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 input[type="file"] {
@@ -101,6 +102,14 @@ body.dark-mode .drop-zone {
     border-color: #e67e00;
 }
 
+body.dark-mode .drop-zone:hover {
+    background-color: #2a2a2a;
+}
+
+body.dark-mode .drop-zone.active {
+    background-color: #2a2a2a;
+}
+
 body.dark-mode #submitManualInput{
     background-color: #ff9800;
 }
@@ -121,16 +130,14 @@ body.dark-mode .create-chart-button:hover{
 .drop-zone {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
+    text-align: center;
     gap: 20px;
     width: 300px;
     height: 150px;
     border: 2px dashed #007bff;
     border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
     margin: 20px auto;
     transition: background-color 0.3s ease;
 }
@@ -145,8 +152,8 @@ body.dark-mode .create-chart-button:hover{
 }
 
 /* Скрыть стандартное поле для выбора файла */
-.file-input {
-    display: none;
+#file-input {
+    pointer-events: none;
 }
 
 /* Стили для обертки ручного ввода */
@@ -212,4 +219,40 @@ body.dark-mode .create-chart-button:hover{
 
 .create-chart-button:hover {
     background-color: #218838;
+}
+
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px; /* Could be more or less, depending on screen size */
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
