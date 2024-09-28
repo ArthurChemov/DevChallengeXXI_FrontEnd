@@ -165,24 +165,56 @@ upload.addEventListener('change', (event) => {
     const file = event.target.files[0];
 
     if (file) {
-        const reader = new FileReader();
+        const fileType = file.name.split('.').pop().toLowerCase(); // Получаем расширение файла
+        const allowedTypes = ['csv', 'xlsx', 'xls', 'json']; // Допустимые типы файлов
 
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
+        if (allowedTypes.includes(fileType)) {
+            if(fileType == 'xlsx' || fileType == 'xls'){
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    // Пример: считывание первого листа
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    // Получение данных в формате JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    showModal(jsonData); // Call the modal with data
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            else if(fileType == 'csv'){
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result; // Get the file content
+                    const rows = content.split('\n').map(row => row.split(',')); // Split rows and columns
+                    const headers = rows[0]; // First row as headers
 
-            // Пример: считывание первого листа
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
+                    // Map rows to JSON objects based on headers
+                    const jsonData = rows.slice(1).map(row => {
+                        return headers.reduce((obj, header, index) => {
+                            obj[header.trim()] = row[index] ? row[index].trim() : null; // Handle empty values
+                            return obj;
+                        }, {});
+                    });
 
-            // Получение данных в формате JSON
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            // Вызываем функцию для отображения данных в модальном окне
-            showModal(jsonData);
-        };
-
-        reader.readAsArrayBuffer(file);
+                    showModal(jsonData); // Call the modal with data
+                };
+                reader.readAsText(file);
+            }
+            else if(fileType == 'json'){
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const jsonData = JSON.parse(e.target.result); // Parse JSON data
+                    showModal(jsonData); // Call the modal with data
+                };
+                reader.readAsText(file);
+            }
+        } else {
+            console.error('Unsupported file type. Please upload a valid file.');
+        }
+    } else {
+        console.log('No file selected');
     }
 });
 
