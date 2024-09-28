@@ -22,6 +22,8 @@ function showModal(data) {
     // Create a table
     const table = document.createElement('table');
     table.id = 'data-table';
+    table.style.width = '100%'; // Set table width to 100%
+    table.style.borderCollapse = 'collapse'; // Collapse borders for better appearance
 
     if (data.length) {
         // Generate table headers (from the keys of the first row)
@@ -30,6 +32,8 @@ function showModal(data) {
         headers.forEach(header => {
             const th = document.createElement('th');
             th.textContent = header;
+            th.style.border = '1px solid #ddd'; // Add border to header
+            th.style.padding = '8px'; // Add padding for header
             headerRow.appendChild(th);
         });
         table.appendChild(headerRow);
@@ -40,6 +44,8 @@ function showModal(data) {
             headers.forEach(header => {
                 const td = document.createElement('td');
                 td.textContent = row[header];
+                td.style.border = '1px solid #ddd'; // Add border to cell
+                td.style.padding = '8px'; // Add padding for cell
                 tableRow.appendChild(td);
             });
             table.appendChild(tableRow);

@@ -236,10 +236,11 @@ body.dark-mode .create-chart-button:hover{
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 5% auto; /* 15% from the top and centered */
+    margin-left: 20px;
+    margin-right: 20px;
     padding: 20px;
     border: 1px solid #888;
-    width: 300px; /* Could be more or less, depending on screen size */
     text-align: center;
 }
 
