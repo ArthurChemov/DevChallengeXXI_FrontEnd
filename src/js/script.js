@@ -248,17 +248,48 @@ upload.addEventListener('change', (event) => {
 });
 
 // Функция для обработки ручного ввода
-submitManualInput.addEventListener('click', () => {
-    const inputData = manualInput.value;
-    if (inputData) {
-        alert(`Manual input data: ${inputData}`);
-    } else {
-        alert('No data entered');
-    }
-});
+// submitManualInput.addEventListener('click', () => {
+//     const inputData = manualInput.value;
+//     if (inputData) {
+//         console.log(`Manual input data: ${inputData}`);
+//     } else {
+//         alert('No data entered');
+//     }
+// });
 
 // Функция для создания диаграммы при выборе и нажатии кнопки
 createChartButton.addEventListener('click', () => {
     const selectedChartType = chartTypeSelect.value;
-    alert(`Creating chart: ${selectedChartType}`);
+    console.log(`Creating chart: ${selectedChartType}`);
 });
+
+function drawGraph() {
+    const labelsInput = document.getElementById('labels').value.split(',');
+    const valuesInput = document.getElementById('values').value.split(',').map(Number);
+    if (labelsInput.length !== valuesInput.length) {
+        alert("Количество меток должно совпадать с количеством значений.");
+        return;
+    }
+    const canvas = document.getElementById('chartCanvas');
+    const ctx = canvas.getContext('2d');
+    // Очищаем холст перед рисованием
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Настройки графика
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const maxValue = Math.max(...valuesInput);
+    const barWidth = canvasWidth / labelsInput.length - 10;
+    // Рисуем столбцы
+    valuesInput.forEach((value, index) => {
+        const barHeight = (value / maxValue) * (canvasHeight - 50);
+        const barX = index * (barWidth + 10) + 10;
+        const barY = canvasHeight - barHeight - 20;
+        // Рисуем столбец
+        ctx.fillStyle = 'steelblue';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+        // Добавляем текст меток под столбцами
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.fillText(labelsInput[index], barX + barWidth / 2, canvasHeight - 5);
+    });
+}

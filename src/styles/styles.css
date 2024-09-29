@@ -160,9 +160,9 @@ body.dark-mode .create-chart-button:hover{
 .manual-input-wrapper {
     margin-top: 20px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 5px;
 }
 
 /* Стили для поля input */
@@ -186,6 +186,18 @@ body.dark-mode .create-chart-button:hover{
 
 #submitManualInput:hover {
     background-color: #0056b3;
+}
+
+.legends-manually{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.values-manually{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 /* Стили для обертки выбора типа диаграммы */
@@ -256,4 +268,8 @@ body.dark-mode .create-chart-button:hover{
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+canvas {
+    border: 1px solid black;
 }

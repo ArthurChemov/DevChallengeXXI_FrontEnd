@@ -33,18 +33,30 @@
         </div>
 
         <section id="manual-input-wrapper" class="manual-input-wrapper">
-            <textarea id="manualInput" class="manual-input" placeholder="Enter data manually..." ></textarea>
+            <!-- <textarea id="manualInput" class="manual-input" placeholder="Enter data manually..." ></textarea> -->
+            <h3>Enter data manually for the chart (separate values with a comma):</h3>
+            <div class="legends-manually">
+                <label for="labels">Legends (e.g., January, February):</label><br>
+                <input type="text" id="labels" value="January,February,March,April"><br><br>
+            </div>
+            <div class="values-manually">
+                <label for="values">Values (e.g., 10, 20, 30, 40):</label><br>
+                <input type="text" id="values" value="10,20,30,40"><br><br>
+            </div>
             <button id="submitManualInput" type="button">Submit</button>
         </section>
 
         <section id="chart-type-wrapper" class="chart-type-wrapper">
             <label for="chartType">Select chart type:</label>
             <select id="chartType" class="chart-type">
-                <option value="line">Line Chart</option>
                 <option value="bar">Bar Chart</option>
+                <option value="line">Line Chart</option>
                 <option value="pie">Pie Chart</option>
             </select>
-            <button id="createChart" type="button" class="create-chart-button">Create Chart</button>
+            <button id="createChart" type="button" class="create-chart-button" onclick="drawGraph()">Create Chart</button>
+        </section>
+        <section>
+            <canvas id="chartCanvas" width="600" height="400"></canvas>
         </section>
     </main>
 
