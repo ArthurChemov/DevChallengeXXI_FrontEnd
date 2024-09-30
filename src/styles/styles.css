@@ -165,41 +165,6 @@ body.dark-mode .create-chart-button:hover{
     gap: 5px;
 }
 
-/* Стили для поля input */
-.manual-input {
-    padding: 10px;
-    width: 300px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Стили для кнопки отправки */
-#submitManualInput {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-#submitManualInput:hover {
-    background-color: #0056b3;
-}
-
-.legends-manually{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.values-manually{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
 /* Стили для обертки выбора типа диаграммы */
 .chart-type-wrapper {
     display: flex;
@@ -207,6 +172,7 @@ body.dark-mode .create-chart-button:hover{
     align-items: center;
     gap: 20px;
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 /* Стили для select */
@@ -268,4 +234,45 @@ body.dark-mode .create-chart-button:hover{
 
 canvas {
     border: 1px solid black;
+}
+
+.manual-input-wrapper {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+input[type="text"], input[type="number"] {
+    width: 90%;
+    padding: 5px;
+}
+
+.table-controls, .submit-button {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
 }

@@ -43,17 +43,30 @@
         </div>
 
         <section id="manual-input-wrapper" class="manual-input-wrapper">
-            <!-- <textarea id="manualInput" class="manual-input" placeholder="Enter data manually..." ></textarea> -->
-            <h3>Enter data manually for the chart (separate values with a comma):</h3>
-            <div class="legends-manually">
-                <label for="labels">Legends (e.g., January, February):</label><br>
-                <input type="text" id="labels" value="January,February,March,April"><br><br>
+            <h3>Manual Input Data</h3>
+
+            <!-- Dynamic Table for Values -->
+            <div class="values-input">
+                <table style="border: 1px" id="values-table">
+                    <thead>
+                        <tr>
+                            <th>X / Y</th>
+                            <!-- Dynamic Y-axis columns will be added here -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic X-axis rows and values will be added here -->
+                    </tbody>
+                </table>
+
+            <div class="table-controls">
+                <button id="add-column">Add Y-Axis Column</button>
+                <button id="add-row">Add X-Axis Row</button>
             </div>
-            <div class="values-manually">
-                <label for="values">Values (e.g., 10, 20, 30, 40):</label><br>
-                <input type="text" id="values" value="10,20,30,40"><br><br>
+
+            <div class="submit-button">
+                <button id="submit-values">Submit</button>
             </div>
-            <button id="submitManualInput" type="button">Submit</button>
         </section>
 
         <section id="chart-type-wrapper" class="chart-type-wrapper">
