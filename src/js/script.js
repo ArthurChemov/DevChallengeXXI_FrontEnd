@@ -10,72 +10,72 @@ const themeToggleButton = document.getElementById('themeToggle');
 const modal = document.getElementById("myModal");
 const span = document.getElementsByClassName("close")[0];
 
-let isDarkMode = false;
-
-// Function to show modal with data
+let isDarkMode = false;// Function to display a modal with provided data
 function showModal(data) {
+    const modalContent = document.querySelector('.modal-content');
     const modalBody = document.getElementById('modal-body');
 
-    // Clear existing content entirely
-    modalBody.innerHTML = ''; // Clear the modal content
+    // Clear any existing content inside the modal
+    modalBody.innerHTML = '';
+    modalContent.style.width = '95%';
+    modalContent.style.margin = '100px 20px 0 20px';
 
-    console.log(data.length)
-    // Check if data is empty or invalid
+    // Create a table element for displaying data
+    const table = document.createElement('table');
+    table.id = 'data-table';
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+
+    // Ensure that data exists and has at least one row
     if (data.length <= 1) {
-        alert("File is empty! Please fill it and upload it."); // Alert the user about the error
+        showErrorModal("No data to display!");
         return;
     }
 
-    // Create a table
-    const table = document.createElement('table');
-    table.id = 'data-table';
-    table.style.width = '100%'; // Set table width to 100%
-    table.style.borderCollapse = 'collapse'; // Collapse borders for better appearance
-
-    // Generate table headers (from the keys of the first row)
+    // Generate table headers using keys from the first object in the array
     const headers = Object.keys(data[0]);
     const headerRow = document.createElement('tr');
+
     headers.forEach(header => {
         const th = document.createElement('th');
         th.textContent = header;
-        th.style.border = '1px solid #ddd'; // Add border to header
-        th.style.padding = '8px'; // Add padding for header
+        th.style.border = '1px solid #ddd';
+        th.style.padding = '8px';
         headerRow.appendChild(th);
     });
+
+    // Append the header row to the table
     table.appendChild(headerRow);
 
-    // Generate table rows
+    // Populate table rows with data
     data.forEach(row => {
         const tableRow = document.createElement('tr');
         headers.forEach(header => {
             const td = document.createElement('td');
-            // Error handling for incorrect or missing values
-            if (row[header] === undefined || row[header] === null || row[header] === "") {
-                td.textContent = 'N/A'; // Mark as 'N/A' if value is missing
-            } else if (row[header] !== 'number' || isNaN(Number(row[header]))) {
-                td.textContent = 'Invalid value'; // Mark as 'Invalid value' for non-numeric fields where numbers are expected
-            } else {
-                td.textContent = row[header]; // Otherwise, set the content to the actual value
-            }
-            td.style.border = '1px solid #ddd'; // Add border to cell
-            td.style.padding = '8px'; // Add padding for cell
+            const cellValue = row[header];
+
+            td.textContent = cellValue; // Display numeric values correctly
+
+            td.style.border = '1px solid #ddd';
+            td.style.padding = '8px';
             tableRow.appendChild(td);
         });
+
+        // Append each data row to the table
         table.appendChild(tableRow);
     });
 
-    // Add the table to the modal body
+    // Append the complete table to the modal body
     modalBody.appendChild(table);
 
-    // Show modal
+    // Display the modal
     modal.style.display = "block";
 
-    // Close modal on clicking "X"
+    // Close the modal when clicking the "X" button or outside the modal
     span.onclick = function() {
         modal.style.display = "none";
     };
 
-    // Close modal on clicking outside the modal
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
@@ -83,7 +83,59 @@ function showModal(data) {
     };
 }
 
+// Function to update the margin dynamically
+function updateModalMargin() {
+    // Get the current window width
+    const width100wv = window.innerWidth;
 
+    // Calculate margin based on current window width
+    const marginHorizontal = (width100wv - 360) / 2;
+
+    // Update modal content margin
+    const modalContent = document.querySelector('.modal-content'); // Assuming it's selected by class
+    if (modalContent) {
+        modalContent.style.margin = `100px ${marginHorizontal}px 0 ${marginHorizontal}px`;
+    }
+}
+
+
+// Function to display a modal with an error message
+function showErrorModal(message) {
+    const modalContent = document.querySelector('.modal-content');
+    const modalBody = document.getElementById('modal-body');
+
+    // Clear any existing content inside the modal
+    modalBody.innerHTML = '';
+    modalContent.style.width = '300px';
+
+    updateModalMargin();
+
+    window.addEventListener('resize', async () => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        updateModalMargin();
+    });
+
+    const errorMessage = document.createElement('p');
+    errorMessage.textContent = message;
+    errorMessage.style.color = 'red'; // Style the error message
+
+    // Append the error message to the modal body and display the modal
+    modalBody.appendChild(errorMessage);
+    modal.style.display = "block";
+
+    // Close the modal on clicking the "X" button or outside the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+}
+
+// Theme toggle button logic
 themeToggleButton.addEventListener('click', () => {
     if (isDarkMode) {
         document.body.classList.remove('dark-mode');
@@ -92,79 +144,87 @@ themeToggleButton.addEventListener('click', () => {
         document.body.classList.add('dark-mode');
         themeToggleButton.textContent = 'Dark Mode';
     }
-    isDarkMode = !isDarkMode;
+    isDarkMode = !isDarkMode; // Toggle the dark mode state
 });
 
-// Функция обработки файлов
+// File handling function for different file types
 function handleFiles(files) {
-    const file = files[0]; // Берем первый файл
+    const file = files[0]; // Select the first file
     if (file) {
-        const fileType = file.name.split('.').pop().toLowerCase(); // Получаем расширение файла
-        const allowedTypes = ['csv', 'xlsx', 'xls', 'json']; // Допустимые типы файлов
+        const fileType = file.name.split('.').pop().toLowerCase(); // Get file extension
+        const allowedTypes = ['csv', 'xlsx', 'xls', 'json']; // Allowed file types
 
         if (allowedTypes.includes(fileType)) {
-            if(fileType == 'xlsx' || fileType == 'xls'){
-                const reader = new FileReader();
+            const reader = new FileReader();
+
+            // Handle Excel files (XLSX or XLS)
+            if (fileType === 'xlsx' || fileType === 'xls') {
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    // Пример: считывание первого листа
+
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    // Try parsing JSON data
+
                     try {
-                        // Получение данных в формате JSON
                         const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                        showModal(jsonData); // Call the modal with data
+                        showModal(jsonData); // Display the data in the modal
                     } catch (error) {
-                        alert("File has syntax errors in JSON! Please check and correct it."); // Alert the user about the error
+                        showErrorModal("File conversion error! Please check the Excel file.");
                     }
                 };
                 reader.readAsArrayBuffer(file);
             }
-            else if(fileType == 'csv'){
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const content = e.target.result; // Get the file content
-                    const rows = content.split('\n').map(row => row.split(',')); // Split rows and columns
-                    const headers = rows[0]; // First row as headers
 
+            // Handle CSV files
+            else if (fileType === 'csv') {
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    const rows = content.split('\n').map(row => row.split(','));
+
+                    const headers = rows[0]; // First row as headers
                     try {
-                        // Map rows to JSON objects based on headers
                         const jsonData = rows.slice(1).map(row => {
                             return headers.reduce((obj, header, index) => {
-                                obj[header.trim()] = row[index] ? row[index].trim() : null; // Handle empty values
+                                obj[header.trim()] = row[index] ? row[index].trim() : null;
                                 return obj;
                             }, {});
                         });
-                        showModal(jsonData); // Call the modal with data
-                    } catch (error) {
-                        alert("File has syntax errors in JSON! Please check and correct it."); // Alert the user about the error
-                    }
 
+                        showModal(jsonData); // Display the data in the modal
+                    } catch (error) {
+                        showErrorModal("File conversion error! Please check the CSV file.");
+                    }
                 };
                 reader.readAsText(file);
             }
-            else if(fileType == 'json'){
-                const reader = new FileReader();
+
+            // Handle JSON files
+            else if (fileType === 'json') {
                 reader.onload = (e) => {
-                    // Try parsing JSON data
                     try {
-                        const jsonData = JSON.parse(e.target.result); // Parse JSON data
-                        showModal(jsonData); // Call the modal with data
+                        const jsonData = JSON.parse(e.target.result); // Try parsing the JSON data
+                        // Validate that the JSON is in the expected format (array of objects)
+                        if (Array.isArray(jsonData)) {
+                            showModal(jsonData); // Display the data in the modal
+                        } else {
+                            showErrorModal("The JSON does not contain valid data.");
+                        }
                     } catch (error) {
-                        alert("File has syntax errors in JSON! Please check and correct it."); // Alert the user about the error
+                        // Show detailed error message in the modal
+                        showErrorModal(`JSON syntax error: ${error.message}. Please check the file.`);
                     }
-                };
+                }
                 reader.readAsText(file);
             }
         } else {
-            alert('Unsupported file type. Please upload a valid file.');
+            showErrorModal("Unsupported file type! Please upload a CSV, XLSX, XLS, or JSON file.");
         }
     } else {
-        alert('No file selected');
+        showErrorModal("No file selected.");
     }
 }
+
 
 // Обработка события перетаскивания файла в зону
 dropZone.addEventListener('dragover', (event) => {

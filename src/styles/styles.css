@@ -247,20 +247,16 @@ body.dark-mode .create-chart-button:hover{
 }
 
 .modal-content {
+    border-radius: 10px;
     background-color: #fefefe;
     margin: 5% auto; /* 15% from the top and centered */
-    margin-left: 20px;
-    margin-right: 20px;
     padding: 20px;
     border: 1px solid #888;
     text-align: center;
 }
 
 .close {
-    color: #aaa;
     float: right;
-    font-size: 28px;
-    font-weight: bold;
 }
 
 .close:hover,
