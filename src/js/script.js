@@ -330,7 +330,7 @@ createChartButton.addEventListener('click', () => {
         console.log('Keys in first item:', Object.keys(cachedJsondata[0]));  // Выводим ключи первого элемента
     }
 
-    // Попытка извлечения данных динамически
+    // Извлечение меток
     const labels = cachedJsondata.map(item => {
         // Перебираем ключи объекта
         for (let key in item) {
@@ -342,27 +342,31 @@ createChartButton.addEventListener('click', () => {
         return 'Unknown';  // Если строковое значение не найдено, возвращаем 'Unknown'
     });
 
-    const values = cachedJsondata.map(item => {
+    // Извлечение значений
+    const valuesArray = []; // Массив для хранения всех значений
+
+    cachedJsondata.forEach(item => {
+        const values = [];
         // Перебираем ключи объекта
         for (let key in item) {
             // Ищем ключ с типом значения 'number', который будем использовать как значение
             if (typeof item[key] === 'number') {
-                return item[key];  // Возвращаем первое числовое значение как значение
+                values.push(item[key]);  // Добавляем все числовые значения в массив
             }
         }
-        return 0;  // Если числовое значение не найдено, возвращаем 0
+        // Добавляем в valuesArray массив значений для текущего элемента
+        valuesArray.push(values);
     });
 
+    // Теперь преобразуем valuesArray для передачи в drawGraph
+    const maxLength = Math.max(...valuesArray.map(v => v.length)); // Находим максимальную длину массива значений
+    const valuesInput = Array.from({ length: maxLength }, (_, i) => valuesArray.map(v => v[i] || 0)); // Транспонируем массивы
+
     // Теперь вызываем функцию для отрисовки графика с извлечёнными данными
-    drawGraph(labels, values);
+    drawGraph(labels, valuesInput);
 });
 
 function drawGraph(labelsInput, valuesInput) {
-    if (labelsInput.length !== valuesInput.length) {
-        showErrorModal("The number of labels must match the number of values.");
-        return;
-    }
-
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -377,7 +381,7 @@ function drawGraph(labelsInput, valuesInput) {
     const axisXEnd = padding;
 
     // Рассчитываем максимальное значение для шкалы Y
-    const maxValue = Math.max(...valuesInput);
+    const maxValue = Math.max(...valuesInput.flat());
     const barWidth = (canvasWidth - padding * 2) / labelsInput.length - 10;
 
     // Рисуем ось Y (вертикальная)
@@ -425,19 +429,25 @@ function drawGraph(labelsInput, valuesInput) {
         ctx.fillText(value, padding - 10, yPos + 5);  // Текст значений на оси Y
     }
 
-    // Рисуем столбцы и метки на оси X
-    valuesInput.forEach((value, index) => {
-        const barHeight = (value / maxValue) * (axisYEnd - padding);
-        const barX = padding + index * (barWidth + 10) + 10;
-        const barY = axisYEnd - barHeight;
+    // Рисуем столбцы и метки на оси X для каждого значения
+    const numberOfValues = valuesInput.length; // Количество наборов значений
+    const valueWidth = barWidth / numberOfValues; // Ширина для каждого набора значений
 
-        // Рисуем столбцы
-        ctx.fillStyle = 'steelblue';
-        ctx.fillRect(barX, barY, barWidth, barHeight);
+    valuesInput.forEach((valueSet, index) => {
+        valueSet.forEach((value, valueIndex) => {
+            const barHeight = (value / maxValue) * (axisYEnd - padding);
+            const barX = padding + index * (barWidth + 10) + valueIndex * valueWidth + 10; // Сдвигаем по индексу
+            const barY = axisYEnd - barHeight;
 
-        // Подписи к столбцам (ось X)
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.fillText(labelsInput[index], barX + barWidth / 2, canvasHeight - 20);
+            // Рисуем столбцы
+            const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для разных значений
+            ctx.fillStyle = colors[valueIndex % colors.length]; // Определяем цвет для текущего набора значений
+            ctx.fillRect(barX, barY, valueWidth - 2, barHeight); // Рисуем столбец
+
+            // Подписи к столбцам (ось X)
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText(labelsInput[index], barX + (valueWidth - 2) / 2, canvasHeight - 20);
+        });
     });
 }
