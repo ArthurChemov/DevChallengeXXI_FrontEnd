@@ -110,11 +110,11 @@ body.dark-mode .drop-zone.active {
     background-color: #2a2a2a;
 }
 
-body.dark-mode #submitManualInput{
+body.dark-mode .submitManualInput{
     background-color: #ff9800;
 }
 
-body.dark-mode #submitManualInput:hover{
+body.dark-mode .submitManualInput:hover{
     background-color: #e67e00;
 }
 
@@ -124,6 +124,26 @@ body.dark-mode .create-chart-button{
 
 body.dark-mode .create-chart-button:hover{
     background-color: #e67e00;
+}
+
+body.dark-mode #add-column{
+    background-color: #ff9800;
+}
+
+body.dark-mode #add-column:hover{
+    background-color: #e67e00;
+}
+
+body.dark-mode #add-row{
+    background-color: #ff9800;
+}
+
+body.dark-mode #add-row:hover{
+    background-color: #e67e00;
+}
+
+body.dark-mode canvas {
+    border: 1px solid white;
 }
 
 /* Стиль для области перетаскивания */
@@ -163,6 +183,21 @@ body.dark-mode .create-chart-button:hover{
     flex-direction: column;
     align-items: center;
     gap: 5px;
+}
+
+.submitManualInput{
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.submitManualInput:hover {
+    background-color: #218838;
 }
 
 /* Стили для обертки выбора типа диаграммы */
@@ -223,6 +258,7 @@ body.dark-mode .create-chart-button:hover{
 
 .close {
     float: right;
+    color: black !important;
 }
 
 .close:hover,
@@ -234,6 +270,12 @@ body.dark-mode .create-chart-button:hover{
 
 canvas {
     border: 1px solid black;
+    border-radius: 10px;
+    margin-bottom: 40px;
+}
+
+#chartCanvas {
+    display: none; /* Скрываем канвас по умолчанию */
 }
 
 .manual-input-wrapper {
@@ -275,4 +317,12 @@ button {
 
 button:hover {
     background-color: #0056b3;
+}
+
+.material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
 }

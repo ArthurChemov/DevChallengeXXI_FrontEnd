@@ -14,6 +14,13 @@ const allowedTypes = ['csv', 'xlsx', 'xls', 'json'];
 let cachedJsondata = [];
 
 let isDarkMode = false;
+let isChart = false;
+
+let xAxis = null;
+let labels = null;
+let labelsY = null;
+let valuesInput = null;
+let selectedChartType = null;
 
 // Theme toggle button logic
 themeToggleButton.addEventListener('click', () => {
@@ -24,7 +31,9 @@ themeToggleButton.addEventListener('click', () => {
         document.body.classList.add('dark-mode');
         themeToggleButton.textContent = 'Dark Mode';
     }
+
     isDarkMode = !isDarkMode;
+    if (isChart) drawGraph(xAxis, labels, labelsY, valuesInput, selectedChartType);
 });
 
 // Function to update the margin dynamically
@@ -86,6 +95,7 @@ function showModal(data) {
     table.id = 'data-table';
     table.style.width = '100%';
     table.style.borderCollapse = 'collapse';
+    table.style.color = 'black'; // Устанавливаем цвет текста
 
     if (data.length === 0) {
         showErrorModal("No data to display!");
@@ -247,8 +257,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const headerRow = document.getElementById('values-table').getElementsByTagName('thead')[0].getElementsByTagName('tr')[0];
 
     let jsonData = [];
-    let yAxisCount = 0;
-    let xAxisCount = 0;
+    let yAxisCount = 2; // Начальное количество Y-осей
+    let xAxisCount = 2; // Начальное количество X-осей
+
+    // Initialize the table with default values
+    function initializeTable() {
+        // Create Y-axis headers
+        for (let i = 1; i <= yAxisCount; i++) {
+            const newHeader = document.createElement('th');
+            newHeader.innerHTML = `<input type="text" placeholder="Y${i}" class="y-axis-label">`;
+            headerRow.appendChild(newHeader);
+        }
+
+        // Create X-axis rows with default values
+        for (let i = 1; i <= xAxisCount; i++) {
+            addRow(`X${i}`);
+        }
+    }
 
     // Function to add a new Y-axis column
     document.getElementById('add-column').addEventListener('click', function () {
@@ -269,14 +294,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Function to add a new X-axis row
-    document.getElementById('add-row').addEventListener('click', function () {
-        xAxisCount++;
-
+    function addRow(xLabel = '') {
         const newRow = document.createElement('tr');
 
         // First cell for the X-axis label
         const xLabelCell = document.createElement('td');
-        xLabelCell.innerHTML = `<input type="text" placeholder="X${xAxisCount}">`;
+        xLabelCell.innerHTML = `<input type="text" placeholder="${xLabel}">`;
         newRow.appendChild(xLabelCell);
 
         // Add the correct number of cells based on existing Y columns
@@ -288,14 +311,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Append the new row to the table body
         valuesTable.appendChild(newRow);
-    });
+    }
+
+    // Create default rows
+    initializeTable();
 
     // Handle form submission
     document.getElementById('submit-values').addEventListener('click', function () {
         cachedJsondata = [];
         jsonData = [];
+
+        // Получаем значение заголовка для оси X
+        const xAxisLabel = headerRow.getElementsByTagName('th')[0].querySelector('input').value;
+
         const yAxisLabels = Array.from(headerRow.getElementsByTagName('th'))
-                                 .slice(1) // Skip the first header column (X \ Y)
+                                 .slice(1) // Skip the first header column (X axis)
                                  .map(header => header.querySelector('input').value || null); // Get Y-axis labels
 
         // Collect X-axis labels and values for each row
@@ -309,86 +339,88 @@ document.addEventListener('DOMContentLoaded', function () {
                                      return { [yAxisLabels[index]]: inputValue ? parseFloat(inputValue) : null };
                                  });
 
-            const combinedRowData = rowData.reduce((acc, current) => Object.assign(acc, current), { "X / Y": xValue });
+            // Используем значение из инпута заголовка для создания combinedRowData
+            const combinedRowData = rowData.reduce((acc, current) => Object.assign(acc, current), { [xAxisLabel]: xValue });
             jsonData.push(combinedRowData);
         }
 
-        cachedJsondata = jsonData;
-        console.log(jsonData)
-        showModal(jsonData);
+        // Проверка на наличие хотя бы одного значения, отличного от null
+        let validData = true;
+        for (let i = 0; i < jsonData.length; i++) {
+            for (const key in jsonData[i]) {
+                if (jsonData[i][key] === null) {
+                    validData = false;
+                    showErrorModal("Please fill in all the details!");
+                    return;
+                }
+            }
+        }
+
+        if (validData) {
+            cachedJsondata = jsonData;
+            console.log(jsonData);
+            showModal(jsonData);
+        }
     });
 });
 
 createChartButton.addEventListener('click', () => {
-    const selectedChartType = chartTypeSelect.value;
-    console.log(`Creating chart: ${selectedChartType}`);
+    selectedChartType = chartTypeSelect.value;  // Получаем выбранный тип графика
 
-    // Логирование данных для исследования структуры
-    console.log(cachedJsondata);
-
-    if (cachedJsondata.length > 0) {
-        console.log('Keys in first item:', Object.keys(cachedJsondata[0]));  // Выводим ключи первого элемента
+    if (cachedJsondata.length < 1) {
+        showErrorModal("No data to display!");
+        return;
     }
 
-    // Извлечение меток
-    const labels = cachedJsondata.map(item => {
-        // Перебираем ключи объекта
-        for (let key in item) {
-            // Ищем ключ с типом значения 'string', который будем использовать как метку
-            if (typeof item[key] === 'string') {
-                return item[key];  // Возвращаем первое строковое значение как метку
-            }
-        }
-        return 'Unknown';  // Если строковое значение не найдено, возвращаем 'Unknown'
+    labels = cachedJsondata.map(item => {
+        const firstKey = Object.keys(item)[0];
+        xAxis = firstKey;
+        return item[firstKey];
     });
 
-    // Извлечение значений
-    const valuesArray = []; // Массив для хранения всех значений
-
-    cachedJsondata.forEach(item => {
-        const values = [];
-        // Перебираем ключи объекта
-        for (let key in item) {
-            // Ищем ключ с типом значения 'number', который будем использовать как значение
-            if (typeof item[key] === 'number') {
-                values.push(item[key]);  // Добавляем все числовые значения в массив
-            }
-        }
-        // Добавляем в valuesArray массив значений для текущего элемента
-        valuesArray.push(values);
+    labelsY = Object.keys(cachedJsondata[0]).slice(1);
+    valuesArray = labelsY.map(labelY => {
+        return cachedJsondata.map(item => item[labelY]);
     });
 
-    // Теперь преобразуем valuesArray для передачи в drawGraph
-    const maxLength = Math.max(...valuesArray.map(v => v.length)); // Находим максимальную длину массива значений
-    const valuesInput = Array.from({ length: maxLength }, (_, i) => valuesArray.map(v => v[i] || 0)); // Транспонируем массивы
+    valuesInput = valuesArray;
 
-    // Теперь вызываем функцию для отрисовки графика с извлечёнными данными
-    drawGraph(labels, valuesInput);
+    // Показываем канвас
+    const canvas = document.getElementById('chartCanvas');
+    canvas.style.display = 'block'; // Делаем канвас видимым
+
+    // Теперь передаем тип графика в drawGraph
+    drawGraph(xAxis, labels, labelsY, valuesInput, selectedChartType);
 });
 
-function drawGraph(labelsInput, valuesInput) {
-    const canvas = document.getElementById('chartCanvas');
-    const ctx = canvas.getContext('2d');
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
 
     // Отступы для осей
     const padding = 50;
-    const axisYEnd = canvasHeight - padding;
-    const axisXEnd = padding;
+    const graphHeight = canvasHeight * 0.9; // 70% высоты для графика
+    const legendHeight = canvasHeight * 0.1; // 30% высоты для легенды
+    const axisYEnd = graphHeight - padding; // Конец оси Y
 
     // Рассчитываем максимальное значение для шкалы Y
     const maxValue = Math.max(...valuesInput.flat());
-    const barWidth = (canvasWidth - padding * 2) / labelsInput.length - 10;
+    const barWidth = (canvasWidth - padding * 2) / (labelsInput.length * labelsInputY.length) - 10; // Ширина для каждого столбца
+
+    // Определяем цвета для разных категорий Y
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для разных категорий Y
+
+    // Установка цветов в зависимости от режима
+    const axisColor = isDarkMode ? 'white' : 'black';
+    const backgroundColor = isDarkMode ? '#333' : 'white'; // Фон графика
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
 
     // Рисуем ось Y (вертикальная)
     ctx.beginPath();
     ctx.moveTo(padding, padding); // Верхняя точка оси Y
     ctx.lineTo(padding, axisYEnd); // Нижняя точка оси Y
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = axisColor;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -396,7 +428,7 @@ function drawGraph(labelsInput, valuesInput) {
     ctx.beginPath();
     ctx.moveTo(padding, axisYEnd); // Начало оси X
     ctx.lineTo(canvasWidth - padding, axisYEnd); // Конец оси X
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = axisColor;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -405,12 +437,16 @@ function drawGraph(labelsInput, valuesInput) {
     ctx.translate(padding - 40, canvasHeight / 2); // Перемещаем на центр оси Y
     ctx.rotate(-Math.PI / 2); // Поворачиваем текст вертикально
     ctx.textAlign = 'center';
-    ctx.fillText('Values', 0, 0); // Текст для оси Y
+    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
+    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+    ctx.fillText('Values', 0, 10); // Текст для оси Y
     ctx.restore(); // Восстанавливаем состояние
 
-    // Добавляем подпись оси X
+    // Добавляем подпись оси X выше легенды
     ctx.textAlign = 'center';
-    ctx.fillText('Categories', canvasWidth / 2, canvasHeight - 5); // Текст для оси X
+    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
+    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+    ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15); // Смещаем текст для оси X выше легенды
 
     // Рисуем метки и значения на оси Y (шкала)
     const yTicks = 5;  // Количество делений на оси Y
@@ -423,31 +459,79 @@ function drawGraph(labelsInput, valuesInput) {
         ctx.beginPath();
         ctx.moveTo(padding - 5, yPos);  // Линия деления
         ctx.lineTo(padding, yPos);
+        ctx.strokeStyle = axisColor; // Цвет сетки
         ctx.stroke();
-
         ctx.textAlign = 'right';
+        ctx.fillStyle = axisColor; // Устанавливаем цвет текста
         ctx.fillText(value, padding - 10, yPos + 5);  // Текст значений на оси Y
     }
 
     // Рисуем столбцы и метки на оси X для каждого значения
-    const numberOfValues = valuesInput.length; // Количество наборов значений
-    const valueWidth = barWidth / numberOfValues; // Ширина для каждого набора значений
-
-    valuesInput.forEach((valueSet, index) => {
-        valueSet.forEach((value, valueIndex) => {
+    valuesInput.forEach((valueSet, valueIndex) => {
+        valueSet.forEach((value, index) => {
             const barHeight = (value / maxValue) * (axisYEnd - padding);
-            const barX = padding + index * (barWidth + 10) + valueIndex * valueWidth + 10; // Сдвигаем по индексу
+
+            // Добавляем 20 пикселей отступа от начала графика
+            const barX = padding + 10 + index * (canvasWidth - padding * 2) / labelsInput.length + valueIndex * barWidth; // Сдвигаем по индексу
             const barY = axisYEnd - barHeight;
 
             // Рисуем столбцы
-            const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для разных значений
-            ctx.fillStyle = colors[valueIndex % colors.length]; // Определяем цвет для текущего набора значений
-            ctx.fillRect(barX, barY, valueWidth - 2, barHeight); // Рисуем столбец
+            ctx.fillStyle = colors[valueIndex % colors.length]; // Определяем цвет для текущей категории
+            ctx.fillRect(barX, barY, barWidth, barHeight); // Рисуем столбец
 
-            // Подписи к столбцам (ось X)
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'center';
-            ctx.fillText(labelsInput[index], barX + (valueWidth - 2) / 2, canvasHeight - 20);
+            // Подписи к столбцам (ось X) выше легенды
+            if (valueIndex === 0) { // Подписи для первого значения из группы
+                ctx.fillStyle = axisColor;
+                ctx.textAlign = 'center';
+
+                // Вычисляем центр группы с учетом отступа
+                const centerX = padding + 20 + (index + 0.5) * (canvasWidth - padding * 2) / labelsInput.length + valueIndex * barWidth;
+
+                // Смещаем подпись для категории выше легенды
+                ctx.fillText(labelsInput[index], centerX - 20, canvasHeight - legendHeight - 35);
+            }
         });
     });
+
+    // Добавление легенды под графиком с переносом в новую колонку
+    const legendX = padding; // Позиция X для легенды (начало)
+    const legendY = graphHeight + padding - 60; // Позиция Y для легенды
+    const legendItemHeight = 20; // Высота каждого элемента легенды
+    const legendColumnWidth = 240; // Ширина колонки легенд
+    let currentLegendX = legendX; // Текущая позиция по X для легенд
+    let currentLegendY = legendY; // Текущая позиция по Y для легенд
+
+    ctx.fillStyle = 'black'; // Цвет текста легенды
+    ctx.font = '14px Arial'; // Шрифт легенды
+
+    // Отрисовка элементов легенды с переносом на новую колонку
+    labelsInputY.forEach((labelY, index) => {
+        // Если элемент выходит за нижнюю границу canvas, переносим на следующую колонку
+        if (currentLegendY + legendItemHeight > canvasHeight) {
+            currentLegendY = legendY; // Возвращаемся в начало по Y
+            currentLegendX += legendColumnWidth; // Смещаемся вправо на ширину новой колонки
+        }
+
+        ctx.fillStyle = colors[index % colors.length]; // Цвет для текущей категории
+        ctx.fillRect(currentLegendX, currentLegendY, 15, 15); // Квадрат цвета
+        ctx.fillStyle = axisColor; // Цвет текста
+        ctx.textAlign = 'left'; // Выравнивание текста по левому краю
+        ctx.fillText(labelY, currentLegendX + 20, currentLegendY + 12); // Текст легенды
+
+        // Смещаемся вниз для следующего элемента
+        currentLegendY += legendItemHeight;
+    });
+}
+
+function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
+    const canvas = document.getElementById('chartCanvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // В зависимости от типа графика вызываем нужную функцию
+    if (chartType === 'bar') {
+        drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+    }
+    isChart = true;
 }
