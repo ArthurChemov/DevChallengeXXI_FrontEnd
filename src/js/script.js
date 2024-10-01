@@ -327,22 +327,34 @@ document.addEventListener('DOMContentLoaded', function () {
         jsonData = [];
 
         // Получаем значение заголовка для оси X
-        const xAxisLabel = headerRow.getElementsByTagName('th')[0].querySelector('input').value;
+        const xAxisLabel = headerRow.getElementsByTagName('th')[0].querySelector('input').value || null;
 
         const yAxisLabels = Array.from(headerRow.getElementsByTagName('th'))
                                  .slice(1) // Skip the first header column (X axis)
                                  .map(header => header.querySelector('input').value || null); // Get Y-axis labels
 
+
+        // Коллекция для проверки уникальности значений X-оси
+        const xAxisValuesSet = new Set();
+
         // Collect X-axis labels and values for each row
         const rows = valuesTable.getElementsByTagName('tr');
         for (let i = 0; i < rows.length; i++) {
-            const xValue = rows[i].getElementsByTagName('td')[0].querySelector('input').value; // X label
+            const xValue = rows[i].getElementsByTagName('td')[0].querySelector('input').value.trim(); // X label
+
+            // Проверка на дублирующиеся значения X-оси
+            if (xAxisValuesSet.has(xValue)) {
+                showErrorModal(`X-axis labels must be unique!`);
+                return;
+            }
+            xAxisValuesSet.add(xValue);
+
             const rowData = Array.from(rows[i].getElementsByTagName('td'))
-                                 .slice(1) // Skip the first column (X label)
-                                 .map((cell, index) => {
-                                     const inputValue = cell.querySelector('input').value;
-                                     return { [yAxisLabels[index]]: inputValue ? parseFloat(inputValue) : null };
-                                 });
+                .slice(1) // Skip the first column (X label)
+                .map((cell, index) => {
+                    const inputValue = cell.querySelector('input').value;
+                    return { [yAxisLabels[index]]: inputValue ? parseFloat(inputValue) : null };
+                });
 
             // Используем значение из инпута заголовка для создания combinedRowData
             const combinedRowData = rowData.reduce((acc, current) => Object.assign(acc, current), { [xAxisLabel]: xValue });
@@ -359,6 +371,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
             }
+        }
+
+        if (!xAxisLabel) {
+            showErrorModal("Please fill in all the details!");
+            return;
+        }
+
+        if (yAxisLabels.some(label => label === null || label.trim() === '')) {
+            showErrorModal("Please fill in all the details!");
+            return;
+        }
+
+        // Проверка на дублирующиеся заголовки Y-осей
+        const uniqueYAxisLabels = new Set(yAxisLabels.map(label => label.trim())); // Используем Set для проверки уникальности
+        if (uniqueYAxisLabels.size !== yAxisLabels.length) {
+            showErrorModal("Y-axis labels must be unique!");
+            return;
+        }
+
+        // Проверка на дублирующийся заголовок X-оси с Y-осями
+        if (uniqueYAxisLabels.has(xAxisLabel.trim())) {
+            showErrorModal("X-axis label must be unique and different from Y-axis labels!");
+            return;
         }
 
         if (validData) {
