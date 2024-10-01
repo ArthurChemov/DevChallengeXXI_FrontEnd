@@ -313,6 +313,11 @@ document.addEventListener('DOMContentLoaded', function () {
         valuesTable.appendChild(newRow);
     }
 
+    document.getElementById('add-row').addEventListener('click', function () {
+        xAxisCount++;
+        addRow(`X${xAxisCount}`);
+    });
+
     // Create default rows
     initializeTable();
 
@@ -523,6 +528,56 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     });
 }
 
+function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+
+    const padding = 50;
+    const graphHeight = canvasHeight * 0.9;
+    const axisYEnd = graphHeight - padding;
+
+    const maxValue = Math.max(...valuesInput.flat());
+
+    // Код для рисования линейного графика
+    ctx.beginPath();
+    for (let valueIndex = 0; valueIndex < valuesInput.length; valueIndex++) {
+        const valueSet = valuesInput[valueIndex];
+        valueSet.forEach((value, index) => {
+            const x = padding + index * (canvasWidth - padding * 2) / labelsInput.length;
+            const y = axisYEnd - (value / maxValue) * (axisYEnd - padding);
+            ctx.lineTo(x, y);
+        });
+    }
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    const radius = Math.min(canvasWidth, canvasHeight) / 2 - 50; // Радиус графика
+    const total = valuesInput.flat().reduce((acc, value) => acc + value, 0); // Общая сумма значений
+
+    let startAngle = 0;
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple'];
+
+    labelsInputY.forEach((labelY, index) => {
+        const value = valuesInput[index].reduce((acc, v) => acc + v, 0); // Сумма значений для текущей категории
+        const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
+
+        ctx.beginPath();
+        ctx.moveTo(canvasWidth / 2, canvasHeight / 2); // Начинаем с центра
+        ctx.arc(canvasWidth / 2, canvasHeight / 2, radius, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.fill();
+
+        // Обновляем начальный угол для следующего сегмента
+        startAngle += sliceAngle;
+    });
+}
+
 function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
@@ -533,5 +588,12 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
     if (chartType === 'bar') {
         drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
     }
+    // else if (chartType === 'line') {
+    //     drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+    // } else if (chartType === 'pie') {
+    //     drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+    // } else {
+    //     console.error('Unknown chart type:', chartType);
+    // }
     isChart = true;
 }
