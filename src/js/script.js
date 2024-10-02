@@ -101,7 +101,7 @@ function showModal(data) {
     table.style.borderCollapse = 'collapse';
     table.style.color = 'black';
 
-    if (data.length === 0) {
+    if (data.length <= 1) {
         showErrorModal("No data to display!");
         return;
     }
@@ -154,9 +154,7 @@ function processFile(file) {
     const reader = new FileReader();
     cachedJsondata = [];
 
-    // Check if the file type is allowed
     if (allowedTypes.includes(fileType)) {
-        // Handle Excel files (XLSX or XLS)
         if (fileType === 'xlsx' || fileType === 'xls') {
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
