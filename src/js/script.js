@@ -10,6 +10,16 @@ const themeToggleButton = document.getElementById('themeToggle');
 const modal = document.getElementById("myModal");
 const span = document.getElementsByClassName("close")[0];
 
+let graphTitle = document.getElementById('graphTitle').value;
+let xAxisCaption = document.getElementById('xAxisCaption').value;
+let yAxisCaption = document.getElementById('yAxisCaption').value;
+
+let lineColor = document.getElementById('lineColor').value;
+let barColor = document.getElementById('barColor').value;
+
+let columnThickness = document.getElementById('columnThickness').value;
+let lineStyle = document.getElementById('lineStyle').value;
+
 const allowedTypes = ['csv', 'xlsx', 'xls', 'json'];
 let cachedJsondata = [];
 
@@ -226,8 +236,7 @@ dropZone.addEventListener('drop', (event) => {
 
     const files = event.dataTransfer.files;
     if (files.length) {
-        fileInput.files = files;
-        processFile(files);
+        processFile(files[0]);
     } else {
         showErrorModal('No files detected');
     }
@@ -247,6 +256,7 @@ upload.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
         processFile(file);
+        event.target.value = '';
     } else {
         showErrorModal("No file selected.");
     }
@@ -403,11 +413,13 @@ createChartButton.addEventListener('click', () => {
         return;
     }
 
-    labels = cachedJsondata.map(item => {
-        const firstKey = Object.keys(item)[0];
-        xAxis = firstKey;
-        return item[firstKey];
-    });
+    if(xAxisCaption === "") {
+        labels = cachedJsondata.map(item => {
+            const firstKey = Object.keys(item)[0];
+            xAxis = firstKey;
+            return item[firstKey];
+        });
+    } else xAxis = xAxisCaption;
 
     labelsY = Object.keys(cachedJsondata[0]).slice(1);
     valuesArray = labelsY.map(labelY => {
@@ -417,14 +429,23 @@ createChartButton.addEventListener('click', () => {
     valuesInput = valuesArray;
 
     // Показываем канвас
-    const canvas = document.getElementById('chartCanvas');
-    canvas.style.display = 'block'; // Делаем канвас видимым
+    document.getElementById('customization-panel').style.display = 'flex';
+    document.getElementById('customization-panel').style.flexDirection = 'column';
+    document.getElementById('customization-panel').style.alignItems = 'center';
+    document.getElementById('customization-panel').style.gap = '20px';
+
+    document.getElementById('chartCanvas').style.display = 'block';
+
+    document.getElementById('exportButtons').style.display = 'flex';
+    document.getElementById('exportButtons').style.flexDirection = 'column';
+    document.getElementById('exportButtons').style.alignItems = 'center';
+    document.getElementById('exportButtons').style.gap = '20px';
 
     // Теперь передаем тип графика в drawGraph
     drawGraph(xAxis, labels, labelsY, valuesInput, selectedChartType);
 });
 
-function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
+function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphTitle) {
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
 
@@ -447,6 +468,14 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
 
+    // Добавляем заголовок
+    ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+    ctx.textAlign = 'center';
+    ctx.font = '14px Arial'; // Шрифт заголовка
+    const centerX = canvasWidth / 2;
+    if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
+    else ctx.fillText(graphTitle, centerX, 30);
+
     // Рисуем ось Y
     ctx.beginPath();
     ctx.moveTo(padding, padding);
@@ -468,7 +497,8 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     ctx.translate(padding - 40, canvasHeight / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = axisColor;
-    ctx.fillText('Values', 0, 10);
+    if(yAxisCaption === "") ctx.fillText("Value", 0, 10);
+    else ctx.fillText(yAxisCaption, 0, 10);
     ctx.restore();
 
     // Добавляем подпись оси X
@@ -488,7 +518,7 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.lineTo(padding, yPos);
         ctx.strokeStyle = axisColor;
         ctx.stroke();
-        ctx.fillText(value, padding - 30, yPos + 5);  // Adjusting position to avoid overlap
+        ctx.fillText(value, padding - 20, yPos + 5);  // Adjusting position to avoid overlap
     }
 
     // Animation variables
@@ -501,6 +531,13 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         ctx.strokeStyle = axisColor;
         ctx.lineWidth = 2;
+
+        // Redraw title
+        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Color text
+        ctx.textAlign = 'center';
+        const centerX = canvasWidth / 2;
+        if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
+        else ctx.fillText(graphTitle, centerX, 30);
 
         // Redraw axes
         ctx.beginPath();
@@ -517,7 +554,8 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.translate(padding - 40, canvasHeight / 2);
         ctx.rotate(-Math.PI / 2);
         ctx.fillStyle = axisColor;
-        ctx.fillText('Values', 0, 10);
+        if(yAxisCaption === "") ctx.fillText("Value", 0, 10);
+        else ctx.fillText(yAxisCaption, 0, 10);
         ctx.restore();
 
         ctx.fillStyle = axisColor;
@@ -532,7 +570,7 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
             ctx.lineTo(padding, yPos);
             ctx.strokeStyle = axisColor;
             ctx.stroke();
-            ctx.fillText(value, padding - 30, yPos + 5);  // Adjusting position to avoid overlap
+            ctx.fillText(value, padding - 20, yPos + 5);  // Adjusting position to avoid overlap
         }
 
         // Calculate progress
@@ -589,6 +627,14 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
 
+    // Добавляем заголовок
+    ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+    ctx.textAlign = 'center';
+    ctx.font = '14px Arial'; // Шрифт заголовка
+    const centerX = canvasWidth / 2;
+    if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
+    else ctx.fillText(graphTitle, centerX, 30);
+
     // Рисуем ось Y (вертикальная)
     ctx.beginPath();
     ctx.moveTo(padding, padding); // Верхняя точка оси Y
@@ -612,7 +658,8 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     ctx.textAlign = 'center';
     ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
     ctx.fillStyle = axisColor; // Устанавливаем цвет текста
-    ctx.fillText('Values', 0, 10); // Текст для оси Y
+    if(yAxisCaption === "") ctx.fillText("Value", 0, 10);
+    else ctx.fillText(yAxisCaption, 0, 10);
     ctx.restore(); // Восстанавливаем состояние
 
     // Добавляем подпись оси X
@@ -636,7 +683,7 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.stroke();
         ctx.textAlign = 'right';
         ctx.fillStyle = axisColor; // Устанавливаем цвет текста
-        ctx.fillText(value, padding - 10, yPos + 5);  // Текст значений на оси Y
+        ctx.fillText(value, padding - 20, yPos + 5);  // Текст значений на оси Y
     }
 
     // Функция для анимации линии между двумя точками
@@ -662,6 +709,13 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Заново закрашиваем фон
 
+        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+        ctx.textAlign = 'center';
+        ctx.font = '14px Arial'; // Шрифт заголовка
+        const centerX = canvasWidth / 2;
+        if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
+        else ctx.fillText(graphTitle, centerX, 30);
+
         // Рисуем оси и подписи, которые не меняются в процессе анимации
         ctx.strokeStyle = axisColor;
         ctx.lineWidth = 2;
@@ -681,7 +735,8 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.textAlign = 'center';
         ctx.font = '14px Arial';
         ctx.fillStyle = axisColor;
-        ctx.fillText('Values', 0, 10);
+        if(yAxisCaption === "") ctx.fillText("Value", 0, 10);
+        else ctx.fillText(yAxisCaption, 0, 10);
         ctx.restore();
 
         ctx.textAlign = 'center';
@@ -700,7 +755,7 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
             ctx.strokeStyle = axisColor;
             ctx.stroke();
             ctx.fillStyle = axisColor;
-            ctx.fillText(value, padding - 10, yPos + 5);
+            ctx.fillText(value, padding - 20, yPos + 5);
         }
 
         // Рисуем линии без анимации для всех предыдущих сегментов
@@ -792,6 +847,7 @@ function drawLegend(ctx, colors, labelsInputY, axisColor, legendX, legendY, canv
         currentLegendY += legendItemHeight;
     });
 }
+
 function drawPieChart(ctx, labelsInputIndex, labelsInput, labelsInputY, valuesInput) {
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
@@ -871,7 +927,8 @@ function drawPieChart(ctx, labelsInputIndex, labelsInput, labelsInputY, valuesIn
         ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
         ctx.textAlign = 'center';
         ctx.font = '20px Arial'; // Шрифт заголовка
-        ctx.fillText(`Data for ${labelsInput[labelsInputIndex]}`, centerX, 30); // Заголовок диаграммы
+        if(graphTitle === "") ctx.fillText(`Data for ${labelsInput[labelsInputIndex]}`, centerX, 30);
+        else ctx.fillText(graphTitle, centerX, 30);
 
         // Если анимация завершена, рисуем подписи
         if (currentSegment >= categoryValues.length) {
@@ -922,4 +979,174 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
         drawPieChart(ctx, 0, labelsInput, labelsInputY, valuesInput);
         isChart = true;
     }
+}
+
+// Функция экспорта в PNG
+document.getElementById('exportPNG').addEventListener('click', function() {
+    const canvas = document.getElementById('chartCanvas');
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'chart.png';
+    link.click();
+});
+
+// Функция экспорта в PDF
+document.getElementById('exportPDF').addEventListener('click', function() {
+    const canvas = document.getElementById('chartCanvas');
+        // Create a new window for the PDF
+        const pdfWindow = window.open('', '_blank');
+
+        // Create a URL for the Blob
+        const imageURL = canvas.toDataURL('image/png');
+
+        // Create an HTML structure for the PDF
+        pdfWindow.document.write('<html><head><title>Export PDF Chart</title></head><body>');
+        pdfWindow.document.write('<img src="' + imageURL + '" style="width: auto; height: auto;">');
+        pdfWindow.document.write('</body></html>');
+
+        // Wait for the content to load, then print to PDF
+        pdfWindow.document.close();
+        pdfWindow.focus();
+
+        pdfWindow.onload = function() {
+            pdfWindow.print();
+            pdfWindow.close();
+        };
+});
+
+// Функция экспорта в SVG
+document.getElementById('exportSVG').addEventListener('click', function() {
+    const canvas = document.getElementById('chartCanvas');
+    const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
+            <foreignObject width="100%" height="100%">
+                <canvas xmlns="http://www.w3.org/1999/xhtml" width="${canvas.width}" height="${canvas.height}">
+                    ${canvas.outerHTML}
+                </canvas>
+            </foreignObject>
+        </svg>`;
+
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'chart.svg';
+    link.click();
+});
+
+// Функция печати графика
+document.getElementById('printChart').addEventListener('click', function() {
+    const canvas = document.getElementById('chartCanvas');
+    const image = canvas.toDataURL('image/png');
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print Chart</title>
+            <style>
+                @media print {
+                    @page {
+                        size: A4 landscape;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        background-color: white;
+                    }
+                    img {
+                        width: 100%;
+                        height: auto;
+                        max-height: 100%;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <img src="${image}">
+        </body>
+        </html>
+    `);
+
+    setTimeout(() => {
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    }, 100);
+});
+
+// Перехват события Ctrl + P для печати страницы
+window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey) && e.key === 'p') {
+        e.preventDefault();
+        const canvas = document.getElementById('chartCanvas');
+        const image = canvas.toDataURL('image/png');
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Chart</title>
+                <style>
+                    @media print {
+                        @page {
+                            size: A4 landscape;
+                            margin: 0;
+                        }
+                        body {
+                            margin: 0;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            background-color: white;
+                        }
+                        img {
+                            width: 100%;
+                            height: auto;
+                            max-height: 100%;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <img src="${image}">
+            </body>
+            </html>
+        `);
+
+        setTimeout(() => {
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }, 100);
+    }
+});
+
+// Function to reset file inputs and cache
+function resetFile() {
+    const fileInput = document.getElementById('upload'); // Assuming this is your file input
+    fileInput.value = ''; // Reset file input
+
+    cachedJsondata = []; // Clear the cached data
+    // Optionally clear the canvas and inputs
+    const canvas = document.getElementById('chartCanvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementById('graphTitle').value = '';
+    document.getElementById('xAxisCaption').value = '';
+    document.getElementById('yAxisCaption').value = '';
+
+    // Hide the canvas
+    document.getElementById('chartCanvas').style.display = 'none';
+    document.getElementById('customization-panel').style.display = 'none';
+    document.getElementById('exportButtons').style.display = 'none';
 }

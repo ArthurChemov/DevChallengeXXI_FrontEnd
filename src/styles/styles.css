@@ -200,6 +200,12 @@ body.dark-mode canvas {
     background-color: #218838;
 }
 
+.full-canvas{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+}
 /* Стили для обертки выбора типа диаграммы */
 .chart-type-wrapper {
     display: flex;
@@ -276,6 +282,14 @@ canvas {
 }
 
 #chartCanvas {
+    display: none; /* Скрываем канвас по умолчанию */
+}
+
+#customization-panel {
+    display: none; /* Скрываем канвас по умолчанию */
+}
+
+#exportButtons {
     display: none; /* Скрываем канвас по умолчанию */
 }
 

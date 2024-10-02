@@ -70,9 +70,47 @@
                 <option value="pie">Pie Chart</option>
             </select>
             <button id="createChart" type="button" class="create-chart-button" onclick="drawGraph()">Create Chart</button>
+            <button id="resetButton" type="button" class="reset-button" onclick="resetFile()">Reset</button>
         </section>
-        <section>
-            <canvas id="chartCanvas" width="1200" height="800"></canvas>
+
+        <section id="full-canvas" class="full-canvas">
+            <aside id="customization-panel">
+                <label for="graphTitle">Graph Title:</label>
+                <input type="text" id="graphTitle" placeholder="Enter graph title">
+
+                <label for="xAxisCaption">X Axis Caption:</label>
+                <input type="text" id="xAxisCaption" placeholder="Enter X Axis caption">
+
+                <label for="yAxisCaption">Y Axis Caption:</label>
+                <input type="text" id="yAxisCaption" placeholder="Enter Y Axis caption">
+
+                <label for="lineColor">Line Color:</label>
+                <input type="color" id="lineColor" value="#0000ff">
+
+                <label for="barColor">Bar Color:</label>
+                <input type="color" id="barColor" value="#ff0000">
+
+                <label for="columnThickness">Column Thickness (for Bar Chart):</label>
+                <input type="range" id="columnThickness" min="1" max="10" value="5">
+
+                <label for="lineStyle">Line Style (for Line Chart):</label>
+                <select id="lineStyle">
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                </select>
+            </aside>
+
+            <section>
+                <canvas id="chartCanvas" width="1200" height="800"></canvas>
+            </section>
+
+            <aside id="exportButtons">
+                <button id="exportPNG">Export as PNG</button>
+                <button id="exportPDF">Export as PDF</button>
+                <button id="exportSVG">Export as SVG</button>
+                <button id="printChart">Print Chart</button>
+            </aside>
         </section>
     </main>
 
