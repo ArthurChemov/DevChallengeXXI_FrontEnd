@@ -32,7 +32,6 @@ let labelsY = null;
 let valuesInput = null;
 let selectedChartType = null;
 
-// Theme toggle button logic
 themeToggleButton.addEventListener('click', () => {
     if (isDarkMode) {
         document.body.classList.remove('dark-mode');
@@ -46,7 +45,6 @@ themeToggleButton.addEventListener('click', () => {
     if (isChart) drawGraph(xAxis, labels, labelsY, valuesInput, selectedChartType);
 });
 
-// Function to update the margin dynamically
 function updateModalMargin() {
     const width100wv = window.innerWidth;
     const marginHorizontal = (width100wv - 360) / 2;
@@ -56,12 +54,10 @@ function updateModalMargin() {
 }
 
 
-// Function to display a modal with an error message
 function showErrorModal(message) {
     const modalContent = document.querySelector('.modal-content');
     const modalBody = document.getElementById('modal-body');
 
-    // Clear any existing content inside the modal
     modalBody.innerHTML = '';
 
     modalContent.style.width = '300px';
@@ -94,25 +90,22 @@ function showModal(data) {
     const modalContent = document.querySelector('.modal-content');
     const modalBody = document.getElementById('modal-body');
 
-    // Clear any existing content inside the modal
     modalBody.innerHTML = '';
 
     modalContent.style.width = '95%';
     modalContent.style.margin = '100px 20px 0 20px';
 
-    // Create a table element for displaying data
     const table = document.createElement('table');
     table.id = 'data-table';
     table.style.width = '100%';
     table.style.borderCollapse = 'collapse';
-    table.style.color = 'black'; // Устанавливаем цвет текста
+    table.style.color = 'black';
 
     if (data.length === 0) {
         showErrorModal("No data to display!");
         return;
     }
 
-    // Generate table headers using keys from the first object in the array
     const headers = Object.keys(data[0]);
     const headerRow = document.createElement('tr');
 
@@ -126,7 +119,6 @@ function showModal(data) {
 
     table.appendChild(headerRow);
 
-    // Table rows with data
     data.forEach(row => {
         const tableRow = document.createElement('tr');
         headers.forEach(header => {
@@ -157,7 +149,6 @@ function showModal(data) {
     };
 }
 
-// Function to process the file based on its type
 function processFile(file) {
     const fileType = file.name.split('.').pop().toLowerCase();
     const reader = new FileReader();
@@ -184,7 +175,6 @@ function processFile(file) {
             reader.readAsArrayBuffer(file);
         }
 
-        // Handle CSV files
         else if (fileType === 'csv') {
             reader.onload = (e) => {
                 const content = e.target.result;
@@ -207,7 +197,6 @@ function processFile(file) {
             reader.readAsText(file);
         }
 
-        // Handle JSON files
         else if (fileType === 'json') {
             reader.onload = (e) => {
                 try {
@@ -229,7 +218,6 @@ function processFile(file) {
     }
 }
 
-// Handle file upload through drag and drop
 dropZone.addEventListener('drop', (event) => {
     event.preventDefault();
     dropZone.classList.remove('active');
@@ -251,7 +239,6 @@ dropZone.addEventListener('dragleave', () => {
     dropZone.classList.remove('active');
 });
 
-// Handle file upload through input
 upload.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -267,34 +254,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const headerRow = document.getElementById('values-table').getElementsByTagName('thead')[0].getElementsByTagName('tr')[0];
 
     let jsonData = [];
-    let yAxisCount = 2; // Начальное количество Y-осей
-    let xAxisCount = 2; // Начальное количество X-осей
+    let yAxisCount = 2;
+    let xAxisCount = 2;
 
-    // Initialize the table with default values
     function initializeTable() {
-        // Create Y-axis headers
         for (let i = 1; i <= yAxisCount; i++) {
             const newHeader = document.createElement('th');
             newHeader.innerHTML = `<input type="text" placeholder="Y${i}" class="y-axis-label">`;
             headerRow.appendChild(newHeader);
         }
 
-        // Create X-axis rows with default values
         for (let i = 1; i <= xAxisCount; i++) {
             addRow(`X${i}`);
         }
     }
 
-    // Function to add a new Y-axis column
     document.getElementById('add-column').addEventListener('click', function () {
         yAxisCount++;
 
-        // Add a new header for Y-axis in the table with an input field for the label
         const newHeader = document.createElement('th');
         newHeader.innerHTML = `<input type="text" placeholder="Y${yAxisCount}" class="y-axis-label">`;
         headerRow.appendChild(newHeader);
 
-        // Add a new input field for every existing row for the new Y column
         const rows = valuesTable.getElementsByTagName('tr');
         for (let i = 0; i < rows.length; i++) {
             const newCell = document.createElement('td');
@@ -303,23 +284,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Function to add a new X-axis row
     function addRow(xLabel = '') {
         const newRow = document.createElement('tr');
 
-        // First cell for the X-axis label
         const xLabelCell = document.createElement('td');
         xLabelCell.innerHTML = `<input type="text" placeholder="${xLabel}">`;
         newRow.appendChild(xLabelCell);
 
-        // Add the correct number of cells based on existing Y columns
         for (let i = 0; i < yAxisCount; i++) {
             const newCell = document.createElement('td');
             newCell.innerHTML = `<input type="number" placeholder="Value">`;
             newRow.appendChild(newCell);
         }
 
-        // Append the new row to the table body
         valuesTable.appendChild(newRow);
     }
 
@@ -328,12 +305,9 @@ document.addEventListener('DOMContentLoaded', function () {
         addRow(`X${xAxisCount}`);
     });
 
-    // Create default rows
     initializeTable();
 
-    // Handle form submission
     document.getElementById('submit-values').addEventListener('click', function () {
-        // Проверка на наличие хотя бы одного значения, отличного от null
         for (let i = 0; i < jsonData.length; i++) {
             for (const key in jsonData[i]) {
                 if (jsonData[i][key] === null) {
@@ -343,26 +317,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Получаем значение заголовка для оси X
         const xAxisLabel = String(headerRow.getElementsByTagName('th')[0].querySelector('input').value).trim();
 
         const yAxisLabels = Array.from(headerRow.getElementsByTagName('th'))
-                                 .slice(1) // Skip the first header column (X axis)
-                                 .map(header => String(header.querySelector('input').value).trim()); // Get Y-axis labels as strings
+                                 .slice(1)
+                                 .map(header => String(header.querySelector('input').value).trim());
 
         if (yAxisLabels.some(label => label === null || label.trim() === '')) {
             showErrorModal("Please fill in all the details!");
             return;
         }
 
-        // Проверка на дублирующиеся заголовки Y-осей
-        const uniqueYAxisLabels = new Set(yAxisLabels.map(label => label.trim())); // Используем Set для проверки уникальности
+        const uniqueYAxisLabels = new Set(yAxisLabels.map(label => label.trim()));
         if (uniqueYAxisLabels.size !== yAxisLabels.length) {
             showErrorModal("Y-axis labels must be unique!");
             return;
         }
 
-        // Проверка на дублирующийся заголовок X-оси с Y-осями
         if (uniqueYAxisLabels.has(xAxisLabel.trim())) {
             showErrorModal("X-axis label must be unique and different from Y-axis labels!");
             return;
@@ -373,15 +344,12 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Коллекция для проверки уникальности значений X-оси
         const xAxisValuesSet = new Set();
 
-        // Collect X-axis labels and values for each row
         const rows = valuesTable.getElementsByTagName('tr');
         for (let i = 0; i < rows.length; i++) {
             const xValue = String(rows[i].getElementsByTagName('td')[0].querySelector('input').value).trim(); // X label as string
 
-            // Проверка на дублирующиеся значения X-оси
             if (xAxisValuesSet.has(xValue)) {
                 showErrorModal(`X-axis labels must be unique!`);
                 return;
@@ -389,13 +357,12 @@ document.addEventListener('DOMContentLoaded', function () {
             xAxisValuesSet.add(xValue);
 
             const rowData = Array.from(rows[i].getElementsByTagName('td'))
-                .slice(1) // Skip the first column (X label)
+                .slice(1)
                 .map((cell, index) => {
                     const inputValue = cell.querySelector('input').value;
                     return { [yAxisLabels[index]]: inputValue ? parseFloat(inputValue) : null };
                 });
 
-            // Используем значение из инпута заголовка для создания combinedRowData
             const combinedRowData = rowData.reduce((acc, current) => Object.assign(acc, current), { [xAxisLabel]: xValue });
             jsonData.push(combinedRowData);
         }
@@ -406,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 createChartButton.addEventListener('click', () => {
-    selectedChartType = chartTypeSelect.value;  // Получаем выбранный тип графика
+    selectedChartType = chartTypeSelect.value;
 
     if (cachedJsondata.length < 1) {
         showErrorModal("No data to display!");
@@ -428,7 +395,6 @@ createChartButton.addEventListener('click', () => {
 
     valuesInput = valuesArray;
 
-    // Показываем канвас
     document.getElementById('customization-panel').style.display = 'flex';
     document.getElementById('customization-panel').style.flexDirection = 'column';
     document.getElementById('customization-panel').style.alignItems = 'center';
@@ -441,7 +407,6 @@ createChartButton.addEventListener('click', () => {
     document.getElementById('exportButtons').style.alignItems = 'center';
     document.getElementById('exportButtons').style.gap = '20px';
 
-    // Теперь передаем тип графика в drawGraph
     drawGraph(xAxis, labels, labelsY, valuesInput, selectedChartType);
 });
 
@@ -449,34 +414,28 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
 
-    // Отступы для осей
     const padding = 50;
-    const graphHeight = canvasHeight * 0.9; // 90% высоты для графика
-    const legendHeight = canvasHeight * 0.1; // 10% высоты для легенды
-    const axisYEnd = graphHeight - padding; // Конец оси Y
+    const graphHeight = canvasHeight * 0.9;
+    const legendHeight = canvasHeight * 0.1;
+    const axisYEnd = graphHeight - padding;
 
-    // Рассчитываем максимальное значение для шкалы Y
     const maxValue = Math.max(...valuesInput.flat());
-    const barWidth = (canvasWidth - padding * 2) / (labelsInput.length * labelsInputY.length) - 10; // Ширина для каждого столбца
+    const barWidth = (canvasWidth - padding * 2) / (labelsInput.length * labelsInputY.length) - 10;
 
-    // Определяем цвета для разных категорий Y
-    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для разных категорий Y
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple'];
 
-    // Установка цветов в зависимости от режима
     const axisColor = isDarkMode ? 'white' : 'black';
-    const backgroundColor = isDarkMode ? '#333' : 'white'; // Фон графика
+    const backgroundColor = isDarkMode ? '#333' : 'white';
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Добавляем заголовок
-    ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+    ctx.fillStyle = isDarkMode ? 'white' : 'black';
     ctx.textAlign = 'center';
-    ctx.font = '14px Arial'; // Шрифт заголовка
+    ctx.font = '14px Arial';
     const centerX = canvasWidth / 2;
     if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
     else ctx.fillText(graphTitle, centerX, 30);
 
-    // Рисуем ось Y
     ctx.beginPath();
     ctx.moveTo(padding, padding);
     ctx.lineTo(padding, axisYEnd);
@@ -484,7 +443,6 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Рисуем ось X
     ctx.beginPath();
     ctx.moveTo(padding, axisYEnd);
     ctx.lineTo(canvasWidth - padding, axisYEnd);
@@ -492,7 +450,6 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Добавляем подпись оси Y
     ctx.save();
     ctx.translate(padding - 40, canvasHeight / 2);
     ctx.rotate(-Math.PI / 2);
@@ -501,11 +458,9 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
     else ctx.fillText(yAxisCaption, 0, 10);
     ctx.restore();
 
-    // Добавляем подпись оси X
     ctx.fillStyle = axisColor;
     ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15);
 
-    // Рисуем метки на оси Y
     const yTicks = 5;
     const stepY = maxValue / yTicks;
 
@@ -518,12 +473,11 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
         ctx.lineTo(padding, yPos);
         ctx.strokeStyle = axisColor;
         ctx.stroke();
-        ctx.fillText(value, padding - 20, yPos + 5);  // Adjusting position to avoid overlap
+        ctx.fillText(value, padding - 20, yPos + 5);
     }
 
-    // Animation variables
     let animationFrame = 0;
-    const animationDuration = 1000; // Duration of animation in milliseconds
+    const animationDuration = 1000;
 
     function animate() {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -532,14 +486,12 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
         ctx.strokeStyle = axisColor;
         ctx.lineWidth = 2;
 
-        // Redraw title
-        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Color text
+        ctx.fillStyle = isDarkMode ? 'white' : 'black';
         ctx.textAlign = 'center';
         const centerX = canvasWidth / 2;
         if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
         else ctx.fillText(graphTitle, centerX, 30);
 
-        // Redraw axes
         ctx.beginPath();
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, axisYEnd);
@@ -549,7 +501,6 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
         ctx.lineTo(canvasWidth - padding, axisYEnd);
         ctx.stroke();
 
-        // Redraw labels and ticks
         ctx.save();
         ctx.translate(padding - 40, canvasHeight / 2);
         ctx.rotate(-Math.PI / 2);
@@ -570,10 +521,9 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
             ctx.lineTo(padding, yPos);
             ctx.strokeStyle = axisColor;
             ctx.stroke();
-            ctx.fillText(value, padding - 20, yPos + 5);  // Adjusting position to avoid overlap
+            ctx.fillText(value, padding - 20, yPos + 5);
         }
 
-        // Calculate progress
         const progress = Math.min(animationFrame / animationDuration, 1);
 
         valuesInput.forEach((valueSet, valueIndex) => {
@@ -596,97 +546,85 @@ function drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput, graphT
 
         drawLegend(ctx, colors, labelsInputY, axisColor, padding, graphHeight + padding - 60, canvasHeight);
 
-        // Increment animation frame
         if (animationFrame < animationDuration) {
-            animationFrame += 16.7; // Approx 60 FPS
+            animationFrame += 16.7;
             requestAnimationFrame(animate);
         }
     }
-    animate(); // Start animation
+    animate();
 }
 
 function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
 
-    // Отступы для осей
     const padding = 50;
-    const graphHeight = canvasHeight * 0.9; // 90% высоты для графика
-    const legendHeight = canvasHeight * 0.1; // 10% высоты для легенды
-    const axisYEnd = graphHeight - padding; // Конец оси Y
+    const graphHeight = canvasHeight * 0.9;
+    const legendHeight = canvasHeight * 0.1;
+    const axisYEnd = graphHeight - padding;
 
-    // Рассчитываем максимальное значение для шкалы Y
     const maxValue = Math.max(...valuesInput.flat());
 
-    // Определяем цвета для разных категорий Y
-    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для линий
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple'];
 
-    // Установка цветов в зависимости от режима
     const axisColor = isDarkMode ? 'white' : 'black';
-    const backgroundColor = isDarkMode ? '#333' : 'white'; // Фон графика
+    const backgroundColor = isDarkMode ? '#333' : 'white';
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Добавляем заголовок
-    ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+    ctx.fillStyle = isDarkMode ? 'white' : 'black';
     ctx.textAlign = 'center';
-    ctx.font = '14px Arial'; // Шрифт заголовка
+    ctx.font = '14px Arial';
     const centerX = canvasWidth / 2;
     if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
     else ctx.fillText(graphTitle, centerX, 30);
 
-    // Рисуем ось Y (вертикальная)
     ctx.beginPath();
-    ctx.moveTo(padding, padding); // Верхняя точка оси Y
-    ctx.lineTo(padding, axisYEnd); // Нижняя точка оси Y
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, axisYEnd);
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Рисуем ось X (горизонтальная)
     ctx.beginPath();
-    ctx.moveTo(padding, axisYEnd); // Начало оси X
-    ctx.lineTo(canvasWidth - padding, axisYEnd); // Конец оси X
+    ctx.moveTo(padding, axisYEnd);
+    ctx.lineTo(canvasWidth - padding, axisYEnd);
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Добавляем подпись оси Y
-    ctx.save(); // Сохраняем текущее состояние
-    ctx.translate(padding - 40, canvasHeight / 2); // Перемещаем на центр оси Y
-    ctx.rotate(-Math.PI / 2); // Поворачиваем текст вертикально
+    ctx.save();
+    ctx.translate(padding - 40, canvasHeight / 2);
+    ctx.rotate(-Math.PI / 2);
     ctx.textAlign = 'center';
-    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
-    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+    ctx.font = '14px Arial';
+    ctx.fillStyle = axisColor;
     if(yAxisCaption === "") ctx.fillText("Value", 0, 10);
     else ctx.fillText(yAxisCaption, 0, 10);
-    ctx.restore(); // Восстанавливаем состояние
+    ctx.restore();
 
-    // Добавляем подпись оси X
     ctx.textAlign = 'center';
-    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
-    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
-    ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15); // Смещаем текст для оси X выше легенды
+    ctx.font = '14px Arial';
+    ctx.fillStyle = axisColor;
+    ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15);
 
-    // Рисуем метки и значения на оси Y (шкала)
-    const yTicks = 5;  // Количество делений на оси Y
+    const yTicks = 5;
     const stepY = maxValue / yTicks;
 
     for (let i = 0; i <= yTicks; i++) {
-        const yPos = axisYEnd - (i * (axisYEnd - padding) / yTicks);  // Позиция деления
-        const value = Math.round(i * stepY);  // Значение деления
+        const yPos = axisYEnd - (i * (axisYEnd - padding) / yTicks);
+        const value = Math.round(i * stepY);
 
         ctx.beginPath();
-        ctx.moveTo(padding - 5, yPos);  // Линия деления
+        ctx.moveTo(padding - 5, yPos);
         ctx.lineTo(padding, yPos);
-        ctx.strokeStyle = axisColor; // Цвет сетки
+        ctx.strokeStyle = axisColor;
         ctx.stroke();
         ctx.textAlign = 'right';
-        ctx.fillStyle = axisColor; // Устанавливаем цвет текста
-        ctx.fillText(value, padding - 20, yPos + 5);  // Текст значений на оси Y
+        ctx.fillStyle = axisColor;
+        ctx.fillText(value, padding - 20, yPos + 5);
     }
 
-    // Функция для анимации линии между двумя точками
     function animateLine(fromX, fromY, toX, toY, progress, color) {
         const currentX = fromX + (toX - fromX) * progress;
         const currentY = fromY + (toY - fromY) * progress;
@@ -699,24 +637,22 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.stroke();
     }
 
-    // Анимация линий
     let currentSegment = 0;
     let currentProgress = 0;
-    const animationDuration = 1000; // Длительность анимации для одного сегмента
+    const animationDuration = 1000;
 
     function animateLines() {
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Очищаем весь холст перед каждой отрисовкой
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Заново закрашиваем фон
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+        ctx.fillStyle = isDarkMode ? 'white' : 'black';
         ctx.textAlign = 'center';
-        ctx.font = '14px Arial'; // Шрифт заголовка
+        ctx.font = '14px Arial';
         const centerX = canvasWidth / 2;
         if(graphTitle === "" || graphTitle === undefined) ctx.fillText("Title", centerX, 30);
         else ctx.fillText(graphTitle, centerX, 30);
 
-        // Рисуем оси и подписи, которые не меняются в процессе анимации
         ctx.strokeStyle = axisColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -744,7 +680,6 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
         ctx.fillStyle = axisColor;
         ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15);
 
-        // Шкала Y
         for (let i = 0; i <= yTicks; i++) {
             const yPos = axisYEnd - (i * (axisYEnd - padding) / yTicks);
             const value = Math.round(i * stepY);
@@ -758,7 +693,6 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
             ctx.fillText(value, padding - 20, yPos + 5);
         }
 
-        // Рисуем линии без анимации для всех предыдущих сегментов
         valuesInput.forEach((valueSet, valueIndex) => {
             ctx.strokeStyle = colors[valueIndex % colors.length];
             ctx.lineWidth = 2;
@@ -777,7 +711,6 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
             ctx.stroke();
         });
 
-        // Анимируем текущий сегмент для всех линий
         valuesInput.forEach((valueSet, valueIndex) => {
             const fromX = padding + currentSegment * (canvasWidth - padding * 2) / (labelsInput.length - 1);
             const toX = padding + (currentSegment + 1) * (canvasWidth - padding * 2) / (labelsInput.length - 1);
@@ -786,19 +719,15 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
 
             const progress = currentProgress / animationDuration;
 
-            // Анимируем от одной точки к следующей
             animateLine(fromX, fromY, toX, toY, progress, colors[valueIndex % colors.length]);
         });
 
-        // Увеличиваем прогресс
-        currentProgress += 16.7; // Около 60 кадров в секунду
+        currentProgress += 16.7;
 
-        // Когда один сегмент завершен, переходим к следующему
         if (currentProgress >= animationDuration) {
             currentSegment++;
             currentProgress = 0;
         }
-        // Рисуем метки на оси X
         labelsInput.forEach((label, index) => {
             const xPos = padding + index * (canvasWidth - padding * 2) / (labelsInput.length - 1);
             ctx.fillStyle = axisColor;
@@ -806,44 +735,37 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
             ctx.fillText(label, xPos, canvasHeight - legendHeight - 35);
         });
 
-        // Рисуем легенду
         drawLegend(ctx, colors, labelsInputY, axisColor, padding, graphHeight + padding - 60, canvasHeight, legendHeight);
 
-        // Продолжаем анимацию, пока не завершены все сегменты
         if (currentSegment < labelsInput.length - 1) {
             requestAnimationFrame(animateLines);
         }
     }
 
-    // Запускаем анимацию
     animateLines();
 }
 
-// Draw Legend Function
 function drawLegend(ctx, colors, labelsInputY, axisColor, legendX, legendY, canvasHeight) {
-    legendItemHeight = 20; // Высота каждого элемента легенды
-    legendColumnWidth = 240; // Ширина колонки легенд
-    let currentLegendX = legendX; // Текущая позиция по X для легенд
-    let currentLegendY = legendY; // Текущая позиция по Y для легенд
+    legendItemHeight = 20;
+    legendColumnWidth = 240;
+    let currentLegendX = legendX;
+    let currentLegendY = legendY;
 
-    ctx.fillStyle = 'black'; // Цвет текста легенды
-    ctx.font = '14px Arial'; // Шрифт легенды
+    ctx.fillStyle = 'black';
+    ctx.font = '14px Arial';
 
-    // Отрисовка элементов легенды с переносом на новую колонку
     labelsInputY.forEach((labelY, index) => {
-        // Если элемент выходит за нижнюю границу canvas, переносим на следующую колонну
         if (currentLegendY + legendItemHeight > canvasHeight) {
-            currentLegendY = legendY; // Возвращаемся в начало по Y
-            currentLegendX += legendColumnWidth; // Смещаемся вправо на ширину новой колонки
+            currentLegendY = legendY;
+            currentLegendX += legendColumnWidth;
         }
 
-        ctx.fillStyle = colors[index % colors.length]; // Цвет для текущей категории
-        ctx.fillRect(currentLegendX, currentLegendY, 15, 15); // Квадрат цвета
-        ctx.fillStyle = axisColor; // Цвет текста
-        ctx.textAlign = 'left'; // Выравнивание текста по левому краю
-        ctx.fillText(labelY, currentLegendX + 20, currentLegendY + 12); // Текст легенды
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.fillRect(currentLegendX, currentLegendY, 15, 15);
+        ctx.fillStyle = axisColor;
+        ctx.textAlign = 'left';
+        ctx.fillText(labelY, currentLegendX + 20, currentLegendY + 12);
 
-        // Смещаемся вниз для следующего элемента
         currentLegendY += legendItemHeight;
     });
 }
@@ -852,110 +774,97 @@ function drawPieChart(ctx, labelsInputIndex, labelsInput, labelsInputY, valuesIn
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
 
-    // Определяем цвета для разных категорий Y
-    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для линий
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple'];
 
-    // Устанавливаем фон для диаграммы
     const backgroundColor = isDarkMode ? '#333' : 'white';
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Получаем значения для выбранного года
-    const categoryValues = valuesInput.map(category => category[labelsInputIndex]); // Берем данные по индексу года
-    const total = categoryValues.reduce((acc, value) => acc + value, 0); // Суммируем все значения
+    const categoryValues = valuesInput.map(category => category[labelsInputIndex]);
+    const total = categoryValues.reduce((acc, value) => acc + value, 0);
 
     if (total === 0) {
         ctx.fillStyle = isDarkMode ? 'white' : 'black';
         ctx.fillText("No data to display!", canvasWidth / 2, canvasHeight / 2);
-        return; // Выходим, если нет данных
+        return;
     }
 
-    // Устанавливаем начальные параметры для рисования
-    const radius = Math.min(canvasWidth, canvasHeight) / 2 - 40; // Радиус диаграммы
-    const centerX = canvasWidth / 2; // Центр по X
-    const centerY = canvasHeight / 2; // Центр по Y
+    const radius = Math.min(canvasWidth, canvasHeight) / 2 - 40;
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
 
-    // Начальные значения для анимации
-    let currentSegment = 0; // Текущий сегмент для анимации
-    let startAngle = 0; // Угол начала для сегментов
-    const animationDuration = 1000; // Длительность анимации одного сегмента
-    let currentProgress = 0; // Прогресс анимации
+    let currentSegment = 0;
+    let startAngle = 0;
+    const animationDuration = 1000;
+    let currentProgress = 0;
 
     function animateSlice() {
-        // Очищаем холст и закрашиваем его
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        // Рисуем уже нарисованные сегменты
         let angle = 0;
         for (let i = 0; i < currentSegment; i++) {
             const value = categoryValues[i];
-            const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
+            const sliceAngle = (value / total) * 2 * Math.PI;
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY); // Перемещаемся в центр
-            ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle); // Рисуем дугу
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
             ctx.closePath();
-            ctx.fillStyle = colors[i % colors.length]; // Выбор цвета
-            ctx.fill(); // Заполняем цветом
-            angle += sliceAngle; // Переходим к следующему сегменту
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            angle += sliceAngle;
         }
 
-        // Рисуем текущий сегмент с анимацией
         if (currentSegment < categoryValues.length) {
             const value = categoryValues[currentSegment];
-            const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
-            const animatedSliceAngle = (sliceAngle * currentProgress) / animationDuration; // Анимированный угол
+            const sliceAngle = (value / total) * 2 * Math.PI;
+            const animatedSliceAngle = (sliceAngle * currentProgress) / animationDuration;
 
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY); // Перемещаемся в центр
-            ctx.arc(centerX, centerY, radius, startAngle, startAngle + animatedSliceAngle); // Рисуем дугу
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, startAngle + animatedSliceAngle);
             ctx.closePath();
-            ctx.fillStyle = colors[currentSegment % colors.length]; // Выбор цвета
-            ctx.fill(); // Заполняем цветом
+            ctx.fillStyle = colors[currentSegment % colors.length];
+            ctx.fill();
 
-            currentProgress += 16; // Прогресс анимации (примерно 60 кадров в секунду)
+            currentProgress += 16.7;
 
-            // Если анимация текущего сегмента завершена
             if (currentProgress >= animationDuration) {
-                currentSegment++; // Переход к следующему сегменту
-                currentProgress = 0; // Сброс прогресса
-                startAngle += sliceAngle; // Обновление угла начала для следующего сегмента
+                currentSegment++;
+                currentProgress = 0;
+                startAngle += sliceAngle;
             }
         }
 
-        // Добавляем заголовок
-        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+        ctx.fillStyle = isDarkMode ? 'white' : 'black';
         ctx.textAlign = 'center';
-        ctx.font = '20px Arial'; // Шрифт заголовка
+        ctx.font = '20px Arial';
         if(graphTitle === "") ctx.fillText(`Data for ${labelsInput[labelsInputIndex]}`, centerX, 30);
         else ctx.fillText(graphTitle, centerX, 30);
 
-        // Если анимация завершена, рисуем подписи
         if (currentSegment >= categoryValues.length) {
-            drawLabelsAndTitle(angle); // Рисуем подписи и заголовок
+            drawLabelsAndTitle(angle);
         } else {
-            requestAnimationFrame(animateSlice); // Продолжаем анимацию
+            requestAnimationFrame(animateSlice);
         }
     }
 
     function drawLabelsAndTitle(finalAngle) {
-        // Добавляем подписи к сегментам
         let angle = 0;
         labelsInput.forEach((label, index) => {
             const value = categoryValues[index];
-            const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
-            const midAngle = angle + sliceAngle / 2; // Средний угол
+            const sliceAngle = (value / total) * 2 * Math.PI;
+            const midAngle = angle + sliceAngle / 2;
 
-            // Позиция для текста
             const labelX = centerX + (radius / 2) * Math.cos(midAngle);
             const labelY = centerY + (radius / 2) * Math.sin(midAngle);
 
-            ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+            ctx.fillStyle = isDarkMode ? 'white' : 'black';
             ctx.textAlign = 'center';
-            ctx.font = '12px Arial'; // Устанавливаем размер и тип шрифта
-            ctx.fillText(`${labelsInputY[index]}: ${value}`, labelX, labelY); // Подпись с значением
+            ctx.font = '12px Arial';
+            ctx.fillText(`${labelsInputY[index]}: ${value}`, labelX, labelY);
 
-            angle += sliceAngle; // Переходим к следующему сегменту
+            angle += sliceAngle;
         });
     }
 
@@ -968,7 +877,6 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // В зависимости от типа графика вызываем нужную функцию
     if (chartType === 'bar') {
         drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
         isChart = true;
@@ -981,7 +889,6 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
     }
 }
 
-// Функция экспорта в PNG
 document.getElementById('exportPNG').addEventListener('click', function() {
     const canvas = document.getElementById('chartCanvas');
     const image = canvas.toDataURL('image/png');
@@ -991,21 +898,16 @@ document.getElementById('exportPNG').addEventListener('click', function() {
     link.click();
 });
 
-// Функция экспорта в PDF
 document.getElementById('exportPDF').addEventListener('click', function() {
     const canvas = document.getElementById('chartCanvas');
-        // Create a new window for the PDF
         const pdfWindow = window.open('', '_blank');
 
-        // Create a URL for the Blob
         const imageURL = canvas.toDataURL('image/png');
 
-        // Create an HTML structure for the PDF
         pdfWindow.document.write('<html><head><title>Export PDF Chart</title></head><body>');
         pdfWindow.document.write('<img src="' + imageURL + '" style="width: auto; height: auto;">');
         pdfWindow.document.write('</body></html>');
 
-        // Wait for the content to load, then print to PDF
         pdfWindow.document.close();
         pdfWindow.focus();
 
@@ -1015,26 +917,27 @@ document.getElementById('exportPDF').addEventListener('click', function() {
         };
 });
 
-// Функция экспорта в SVG
 document.getElementById('exportSVG').addEventListener('click', function() {
     const canvas = document.getElementById('chartCanvas');
+
+    const dataURL = canvas.toDataURL('image/png');
+
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
-            <foreignObject width="100%" height="100%">
-                <canvas xmlns="http://www.w3.org/1999/xhtml" width="${canvas.width}" height="${canvas.height}">
-                    ${canvas.outerHTML}
-                </canvas>
-            </foreignObject>
+            <image href="${dataURL}" width="${canvas.width}" height="${canvas.height}" />
         </svg>`;
 
-    const blob = new Blob([svg], { type: 'image/svg+xml' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'chart.svg';
-    link.click();
+    const svgData = encodeURIComponent(svg);
+    const downloadLink = document.createElement('a');
+
+    downloadLink.href = `data:image/svg+xml;charset=utf-8,${svgData}`;
+    downloadLink.download = 'chart.svg';
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 });
 
-// Функция печати графика
 document.getElementById('printChart').addEventListener('click', function() {
     const canvas = document.getElementById('chartCanvas');
     const image = canvas.toDataURL('image/png');
@@ -1080,7 +983,6 @@ document.getElementById('printChart').addEventListener('click', function() {
     }, 100);
 });
 
-// Перехват события Ctrl + P для печати страницы
 window.addEventListener('keydown', function(e) {
     if ((e.ctrlKey) && e.key === 'p') {
         e.preventDefault();
@@ -1129,13 +1031,11 @@ window.addEventListener('keydown', function(e) {
     }
 });
 
-// Function to reset file inputs and cache
 function resetFile() {
-    const fileInput = document.getElementById('upload'); // Assuming this is your file input
-    fileInput.value = ''; // Reset file input
+    const fileInput = document.getElementById('upload');
+    fileInput.value = '';
 
-    cachedJsondata = []; // Clear the cached data
-    // Optionally clear the canvas and inputs
+    cachedJsondata = [];
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -1145,7 +1045,6 @@ function resetFile() {
     document.getElementById('xAxisCaption').value = '';
     document.getElementById('yAxisCaption').value = '';
 
-    // Hide the canvas
     document.getElementById('chartCanvas').style.display = 'none';
     document.getElementById('customization-panel').style.display = 'none';
     document.getElementById('exportButtons').style.display = 'none';

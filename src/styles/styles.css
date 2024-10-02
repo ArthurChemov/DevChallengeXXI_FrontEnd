@@ -1,48 +1,74 @@
-/* Основной стиль для body */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
-    color: #333;
-    text-align: center; /* Центрирование текста по умолчанию */
+    background-color: #F1F1F1;
+    color: #000000;
+    text-align: center;
 }
 
-/* Стили для header */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background-color: #fff;
+    background-color: #FFFFFF;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Центрирование заголовка (h1 будет автоматически в центре благодаря flexbox) */
 h1 {
     padding-left: 110px;
     margin: 0;
-    flex: 1; /* Чтобы занимать пространство между кнопкой и границей */
+    flex: 1;
     text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #003366;
+    line-height: 32px;
 }
 
-/* Кнопка справа для переключения темы */
-.theme-toggle {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
+#add-column{
+    padding: 12px 24px;
+    background-color: #FFD700;
+    color: #000000;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 0;
     font-size: 14px;
-    width: 110px;
+}
+
+#add-column:hover {
+    background-color: #FFC107;
+}
+
+#add-row{
+    padding: 12px 24px;
+    background-color: #FFD700;
+    color: #000000;
+    border: none;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+#add-row:hover {
+    background-color: #FFC107;
+}
+
+.theme-toggle {
+    padding: 12px 24px;
+    background-color: #FFD700;
+    color: #000000;
+    border: none;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 14px;
 }
 
 .theme-toggle:hover {
-    background-color: #0056b3;
+    background-color: #FFC107;
 }
 
-/* Центрирование контента в main */
 main {
     margin-top: 20px;
     display: flex;
@@ -50,7 +76,6 @@ main {
     align-items: center;
 }
 
-/* Стили для обертки поля файла */
 .file-input-wrapper {
     margin-bottom: 20px;
 }
@@ -58,7 +83,7 @@ main {
 .file-input-wrapper label {
     display: inline-block;
     padding: 10px;
-    background-color: #fff;
+    background-color: #FFFFFF;
     cursor: pointer;
     border-radius: 5px;
     color: #333;
@@ -66,13 +91,12 @@ main {
 }
 
 input[type="file"] {
-    display: none; /* Скрываем стандартное поле для файла */
+    display: none;
 }
 
-/* Темная тема */
 body.dark-mode {
-    background-color: #333;
-    color: #f0f0f0;
+    background-color: #121212;
+    color: #FFFFFF;
 }
 
 body.dark-mode header {
@@ -81,72 +105,30 @@ body.dark-mode header {
 }
 
 body.dark-mode h1 {
-    color: #f0f0f0;
-}
-
-body.dark-mode .theme-toggle {
-    background-color: #ff9800;
-    color: #333;
-}
-
-body.dark-mode .theme-toggle:hover {
-    background-color: #e67e00;
+    color: #FFFFFF;
 }
 
 body.dark-mode .file-input-wrapper label {
     background-color: #555;
-    color: #f0f0f0;
+    color: #FFFFFF;
 }
 
 body.dark-mode .drop-zone {
-    border-color: #e67e00;
+    border-color: #FFD700;
 }
 
 body.dark-mode .drop-zone:hover {
-    background-color: #2a2a2a;
+    background-color: #2A2A2A;
 }
 
 body.dark-mode .drop-zone.active {
-    background-color: #2a2a2a;
+    background-color: #2A2A2A;
 }
 
-body.dark-mode .submitManualInput{
-    background-color: #ff9800;
+body.dark-mode .documentation {
+    border-color: #FFD700;
 }
 
-body.dark-mode .submitManualInput:hover{
-    background-color: #e67e00;
-}
-
-body.dark-mode .create-chart-button{
-    background-color: #ff9800;
-}
-
-body.dark-mode .create-chart-button:hover{
-    background-color: #e67e00;
-}
-
-body.dark-mode #add-column{
-    background-color: #ff9800;
-}
-
-body.dark-mode #add-column:hover{
-    background-color: #e67e00;
-}
-
-body.dark-mode #add-row{
-    background-color: #ff9800;
-}
-
-body.dark-mode #add-row:hover{
-    background-color: #e67e00;
-}
-
-body.dark-mode canvas {
-    border: 1px solid white;
-}
-
-/* Стиль для области перетаскивания */
 .drop-zone {
     display: flex;
     flex-direction: column;
@@ -156,27 +138,21 @@ body.dark-mode canvas {
     gap: 20px;
     width: 300px;
     height: 150px;
-    border: 2px dashed #007bff;
+    border: 2px dashed #003366;
     border-radius: 10px;
     margin: 20px auto;
     transition: background-color 0.3s ease;
 }
 
 .drop-zone:hover {
-    background-color: #f0f0f0;
+    background-color: #F1F1F1;
 }
 
 .drop-zone.active {
-    background-color: #e0e0e0;
-    border-color: #0056b3;
+    background-color: #E0E0E0;
+    border-color: #0056A2;
 }
 
-/* Скрыть стандартное поле для выбора файла */
-#file-input {
-    pointer-events: none;
-}
-
-/* Стили для обертки ручного ввода */
 .manual-input-wrapper {
     margin-top: 20px;
     display: flex;
@@ -185,28 +161,28 @@ body.dark-mode canvas {
     gap: 5px;
 }
 
-.submitManualInput{
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
+.submitManualInput {
+    padding: 12px 24px;
+    background-color: #003366;
+    color: #FFFFFF;
     border: none;
-    border-radius: 5px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
 }
 
 .submitManualInput:hover {
-    background-color: #218838;
+    background-color: #00284D;
 }
 
-.full-canvas{
+.full-canvas {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 40px;
 }
-/* Стили для обертки выбора типа диаграммы */
+
 .chart-type-wrapper {
     display: flex;
     flex-direction: row;
@@ -216,7 +192,6 @@ body.dark-mode canvas {
     margin-bottom: 20px;
 }
 
-/* Стили для select */
 .chart-type {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
@@ -225,39 +200,37 @@ body.dark-mode canvas {
     border-radius: 5px;
 }
 
-/* Стили для кнопки "Создать диаграмму" */
 .create-chart-button {
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
+    padding: 12px 24px;
+    background-color: #003366;
+    color: #FFFFFF;
     border: none;
-    border-radius: 5px;
+    border-radius: 0;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
 }
 
 .create-chart-button:hover {
-    background-color: #218838;
+    background-color: #00284D;
 }
 
-
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
     border-radius: 10px;
-    background-color: #fefefe;
-    margin: 5% auto; /* 15% from the top and centered */
+    background-color: #FFFFFF;
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
     text-align: center;
@@ -275,6 +248,32 @@ body.dark-mode canvas {
     cursor: pointer;
 }
 
+.doc-n-upload {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.documentation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    padding-top: 40px;
+    padding-right: 40px;
+    margin-right: 100px;
+    border-radius: 8px;
+    border: 2px dashed #003366;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-size: small;
+}
+
+.doc-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 canvas {
     border: 1px solid black;
     border-radius: 10px;
@@ -282,15 +281,15 @@ canvas {
 }
 
 #chartCanvas {
-    display: none; /* Скрываем канвас по умолчанию */
+    display: none;
 }
 
 #customization-panel {
-    display: none; /* Скрываем канвас по умолчанию */
+    display: none;
 }
 
 #exportButtons {
-    display: none; /* Скрываем канвас по умолчанию */
+    display: none;
 }
 
 .manual-input-wrapper {
@@ -313,7 +312,7 @@ th, td {
 
 input[type="text"], input[type="number"] {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 5px;
+    border: 5px solid #ccc;
     width: 90%;
     padding: 5px;
 }
@@ -323,23 +322,110 @@ input[type="text"], input[type="number"] {
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     margin-right: 10px;
-    background-color: #007BFF;
-    color: white;
+    background-color: #003366;
+    color: #FFFFFF;
     border: none;
-    border-radius: 5px;
+    border-radius: 0;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #00284D;
 }
 
 .material-symbols-outlined {
     font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+}
+
+.error-button {
+    padding: 12px 24px;
+    background-color: #D32F2F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.error-button:hover {
+    background-color: #B71C1C;
+}
+
+.secondary-button {
+    padding: 12px 24px;
+    background-color: #FFD700;
+    color: #000000;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.secondary-button:hover {
+    background-color: #FFC107;
+}
+
+@media (max-width: 900px) {
+    body {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    #title {
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .doc-n-upload {
+        display: block;
+    }
+
+    .documentation, .uploading {
+        width: auto;
+        margin-bottom: 20px;
+    }
+
+    .values-input table {
+        width: 100%;
+    }
+
+    .table-controls, .submit-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #full-canvas {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #customization-panel {
+        margin-bottom: 20px;
+    }
+
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    #exportButtons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #exportButtons button {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #chartCanvas {
+        width: 100%;
+        height: auto;
+    }
 }
