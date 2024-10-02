@@ -326,13 +326,45 @@ document.addEventListener('DOMContentLoaded', function () {
         cachedJsondata = [];
         jsonData = [];
 
+        // Проверка на наличие хотя бы одного значения, отличного от null
+        for (let i = 0; i < jsonData.length; i++) {
+            for (const key in jsonData[i]) {
+                if (jsonData[i][key] === null) {
+                    showErrorModal("Please fill in all the details!");
+                    return;
+                }
+            }
+        }
+
         // Получаем значение заголовка для оси X
-        const xAxisLabel = headerRow.getElementsByTagName('th')[0].querySelector('input').value || null;
+        const xAxisLabel = String(headerRow.getElementsByTagName('th')[0].querySelector('input').value).trim();
 
         const yAxisLabels = Array.from(headerRow.getElementsByTagName('th'))
                                  .slice(1) // Skip the first header column (X axis)
-                                 .map(header => header.querySelector('input').value || null); // Get Y-axis labels
+                                 .map(header => String(header.querySelector('input').value).trim()); // Get Y-axis labels as strings
 
+        if (yAxisLabels.some(label => label === null || label.trim() === '')) {
+            showErrorModal("Please fill in all the details!");
+            return;
+        }
+
+        // Проверка на дублирующиеся заголовки Y-осей
+        const uniqueYAxisLabels = new Set(yAxisLabels.map(label => label.trim())); // Используем Set для проверки уникальности
+        if (uniqueYAxisLabels.size !== yAxisLabels.length) {
+            showErrorModal("Y-axis labels must be unique!");
+            return;
+        }
+
+        // Проверка на дублирующийся заголовок X-оси с Y-осями
+        if (uniqueYAxisLabels.has(xAxisLabel.trim())) {
+            showErrorModal("X-axis label must be unique and different from Y-axis labels!");
+            return;
+        }
+
+        if (!xAxisLabel) {
+            showErrorModal("Please fill in all the details!");
+            return;
+        }
 
         // Коллекция для проверки уникальности значений X-оси
         const xAxisValuesSet = new Set();
@@ -340,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Collect X-axis labels and values for each row
         const rows = valuesTable.getElementsByTagName('tr');
         for (let i = 0; i < rows.length; i++) {
-            const xValue = rows[i].getElementsByTagName('td')[0].querySelector('input').value.trim(); // X label
+            const xValue = String(rows[i].getElementsByTagName('td')[0].querySelector('input').value).trim(); // X label as string
 
             // Проверка на дублирующиеся значения X-оси
             if (xAxisValuesSet.has(xValue)) {
@@ -361,46 +393,8 @@ document.addEventListener('DOMContentLoaded', function () {
             jsonData.push(combinedRowData);
         }
 
-        // Проверка на наличие хотя бы одного значения, отличного от null
-        let validData = true;
-        for (let i = 0; i < jsonData.length; i++) {
-            for (const key in jsonData[i]) {
-                if (jsonData[i][key] === null) {
-                    validData = false;
-                    showErrorModal("Please fill in all the details!");
-                    return;
-                }
-            }
-        }
-
-        if (!xAxisLabel) {
-            showErrorModal("Please fill in all the details!");
-            return;
-        }
-
-        if (yAxisLabels.some(label => label === null || label.trim() === '')) {
-            showErrorModal("Please fill in all the details!");
-            return;
-        }
-
-        // Проверка на дублирующиеся заголовки Y-осей
-        const uniqueYAxisLabels = new Set(yAxisLabels.map(label => label.trim())); // Используем Set для проверки уникальности
-        if (uniqueYAxisLabels.size !== yAxisLabels.length) {
-            showErrorModal("Y-axis labels must be unique!");
-            return;
-        }
-
-        // Проверка на дублирующийся заголовок X-оси с Y-осями
-        if (uniqueYAxisLabels.has(xAxisLabel.trim())) {
-            showErrorModal("X-axis label must be unique and different from Y-axis labels!");
-            return;
-        }
-
-        if (validData) {
-            cachedJsondata = jsonData;
-            console.log(jsonData);
-            showModal(jsonData);
-        }
+        cachedJsondata = jsonData;
+        showModal(jsonData);
     });
 });
 
@@ -567,50 +561,132 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
 
+    // Отступы для осей
     const padding = 50;
-    const graphHeight = canvasHeight * 0.9;
-    const axisYEnd = graphHeight - padding;
+    const graphHeight = canvasHeight * 0.9; // 90% высоты для графика
+    const legendHeight = canvasHeight * 0.1; // 10% высоты для легенды
+    const axisYEnd = graphHeight - padding; // Конец оси Y
 
+    // Рассчитываем максимальное значение для шкалы Y
     const maxValue = Math.max(...valuesInput.flat());
 
-    // Код для рисования линейного графика
+    // Определяем цвета для разных категорий Y
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для линий
+
+    // Установка цветов в зависимости от режима
+    const axisColor = isDarkMode ? 'white' : 'black';
+    const backgroundColor = isDarkMode ? '#333' : 'white'; // Фон графика
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight); // Закрашиваем фон
+
+    // Рисуем ось Y (вертикальная)
     ctx.beginPath();
-    for (let valueIndex = 0; valueIndex < valuesInput.length; valueIndex++) {
-        const valueSet = valuesInput[valueIndex];
-        valueSet.forEach((value, index) => {
-            const x = padding + index * (canvasWidth - padding * 2) / labelsInput.length;
-            const y = axisYEnd - (value / maxValue) * (axisYEnd - padding);
-            ctx.lineTo(x, y);
-        });
-    }
-    ctx.strokeStyle = 'blue';
+    ctx.moveTo(padding, padding); // Верхняя точка оси Y
+    ctx.lineTo(padding, axisYEnd); // Нижняя точка оси Y
+    ctx.strokeStyle = axisColor;
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    // Рисуем ось X (горизонтальная)
+    ctx.beginPath();
+    ctx.moveTo(padding, axisYEnd); // Начало оси X
+    ctx.lineTo(canvasWidth - padding, axisYEnd); // Конец оси X
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Добавляем подпись оси Y
+    ctx.save(); // Сохраняем текущее состояние
+    ctx.translate(padding - 40, canvasHeight / 2); // Перемещаем на центр оси Y
+    ctx.rotate(-Math.PI / 2); // Поворачиваем текст вертикально
+    ctx.textAlign = 'center';
+    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
+    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+    ctx.fillText('Values', 0, 10); // Текст для оси Y
+    ctx.restore(); // Восстанавливаем состояние
+
+    // Добавляем подпись оси X
+    ctx.textAlign = 'center';
+    ctx.font = '14px Arial'; // Устанавливаем размер и тип шрифта
+    ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+    ctx.fillText(xAxis, canvasWidth / 2, canvasHeight - legendHeight - 15); // Смещаем текст для оси X выше легенды
+
+    // Рисуем метки и значения на оси Y (шкала)
+    const yTicks = 5;  // Количество делений на оси Y
+    const stepY = maxValue / yTicks;
+
+    for (let i = 0; i <= yTicks; i++) {
+        const yPos = axisYEnd - (i * (axisYEnd - padding) / yTicks);  // Позиция деления
+        const value = Math.round(i * stepY);  // Значение деления
+
+        ctx.beginPath();
+        ctx.moveTo(padding - 5, yPos);  // Линия деления
+        ctx.lineTo(padding, yPos);
+        ctx.strokeStyle = axisColor; // Цвет сетки
+        ctx.stroke();
+        ctx.textAlign = 'right';
+        ctx.fillStyle = axisColor; // Устанавливаем цвет текста
+        ctx.fillText(value, padding - 10, yPos + 5);  // Текст значений на оси Y
+    }
+
+    // Рисуем линии и метки на оси X для каждого значения
+    valuesInput.forEach((valueSet, valueIndex) => {
+        ctx.beginPath(); // Начинаем новую линию
+        ctx.strokeStyle = colors[valueIndex % colors.length]; // Определяем цвет для текущей категории
+        ctx.lineWidth = 2;
+
+        valueSet.forEach((value, index) => {
+            const xPos = padding + index * (canvasWidth - padding * 2) / (labelsInput.length - 1);  // Позиция по X для текущего значения
+            const yPos = axisYEnd - (value / maxValue) * (axisYEnd - padding); // Позиция по Y для текущего значения
+
+            if (index === 0) {
+                ctx.moveTo(xPos, yPos); // Начальная точка линии
+            } else {
+                ctx.lineTo(xPos, yPos); // Соединяем точки линиями
+            }
+        });
+        ctx.stroke(); // Завершаем отрисовку линии
+    });
+
+    // Рисуем подписи для оси X
+    labelsInput.forEach((label, index) => {
+        const xPos = padding + index * (canvasWidth - padding * 2) / (labelsInput.length - 1);  // Позиция для метки на оси X
+        ctx.fillStyle = axisColor;
+        ctx.textAlign = 'center';
+        ctx.fillText(label, xPos, canvasHeight - legendHeight - 35);  // Подпись к метке
+    });
+
+    // Добавление легенды под графиком
+    const legendX = padding; // Позиция X для легенды (начало)
+    const legendY = graphHeight + padding - 60; // Позиция Y для легенды
+    const legendItemHeight = 20; // Высота каждого элемента легенды
+    const legendColumnWidth = 240; // Ширина колонки легенд
+    let currentLegendX = legendX; // Текущая позиция по X для легенд
+    let currentLegendY = legendY; // Текущая позиция по Y для легенд
+
+    ctx.fillStyle = 'black'; // Цвет текста легенды
+    ctx.font = '14px Arial'; // Шрифт легенды
+
+    // Отрисовка элементов легенды с переносом на новую колонку
+    labelsInputY.forEach((labelY, index) => {
+        // Если элемент выходит за нижнюю границу canvas, переносим на следующую колонну
+        if (currentLegendY + legendItemHeight > canvasHeight) {
+            currentLegendY = legendY; // Возвращаемся в начало по Y
+            currentLegendX += legendColumnWidth; // Смещаемся вправо на ширину новой колонки
+        }
+
+        ctx.fillStyle = colors[index % colors.length]; // Цвет для текущей категории
+        ctx.fillRect(currentLegendX, currentLegendY, 15, 15); // Квадрат цвета
+        ctx.fillStyle = axisColor; // Цвет текста
+        ctx.textAlign = 'left'; // Выравнивание текста по левому краю
+        ctx.fillText(labelY, currentLegendX + 20, currentLegendY + 12); // Текст легенды
+
+        // Смещаемся вниз для следующего элемента
+        currentLegendY += legendItemHeight;
+    });
 }
 
 function drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
-    const radius = Math.min(canvasWidth, canvasHeight) / 2 - 50; // Радиус графика
-    const total = valuesInput.flat().reduce((acc, value) => acc + value, 0); // Общая сумма значений
-
-    let startAngle = 0;
-    const colors = ['steelblue', 'orange', 'green', 'red', 'purple'];
-
-    labelsInputY.forEach((labelY, index) => {
-        const value = valuesInput[index].reduce((acc, v) => acc + v, 0); // Сумма значений для текущей категории
-        const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
-
-        ctx.beginPath();
-        ctx.moveTo(canvasWidth / 2, canvasHeight / 2); // Начинаем с центра
-        ctx.arc(canvasWidth / 2, canvasHeight / 2, radius, startAngle, startAngle + sliceAngle);
-        ctx.closePath();
-        ctx.fillStyle = colors[index % colors.length];
-        ctx.fill();
-
-        // Обновляем начальный угол для следующего сегмента
-        startAngle += sliceAngle;
-    });
 }
 
 function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
@@ -622,13 +698,10 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
     // В зависимости от типа графика вызываем нужную функцию
     if (chartType === 'bar') {
         drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+    } else if (chartType === 'line') {
+        drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+    } else if (chartType === 'pie') {
+        drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
     }
-    // else if (chartType === 'line') {
-    //     drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
-    // } else if (chartType === 'pie') {
-    //     drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
-    // } else {
-    //     console.error('Unknown chart type:', chartType);
-    // }
     isChart = true;
 }
