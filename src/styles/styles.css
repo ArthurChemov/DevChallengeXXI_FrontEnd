@@ -212,6 +212,7 @@ body.dark-mode canvas {
 
 /* Стили для select */
 .chart-type {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
     width: 200px;
     border: 1px solid #ccc;
@@ -297,6 +298,8 @@ th, td {
 }
 
 input[type="text"], input[type="number"] {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 5px;
     width: 90%;
     padding: 5px;
 }

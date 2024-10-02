@@ -686,7 +686,75 @@ function drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
     });
 }
 
-function drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput) {
+function drawPieChart(ctx, labelsInputIndex, labelsInput, labelsInputY, valuesInput) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+
+    // Определяем цвета для разных категорий Y
+    const colors = ['steelblue', 'orange', 'green', 'red', 'purple']; // Цвета для линий
+
+    // Устанавливаем фон для диаграммы
+    const backgroundColor = isDarkMode ? '#333' : 'white';
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // Получаем значения для выбранного года
+    const categoryValues = valuesInput.map(category => category[labelsInputIndex]); // Берем данные по индексу года
+    const total = categoryValues.reduce((acc, value) => acc + value, 0); // Суммируем все значения
+
+    if (total === 0) {
+        ctx.fillStyle = isDarkMode ? 'white' : 'black';
+        ctx.fillText("No data to display!", canvasWidth / 2, canvasHeight / 2);
+        return; // Выходим, если нет данных
+    }
+
+    // Устанавливаем начальные параметры для рисования
+    let startAngle = 0;
+    const radius = Math.min(canvasWidth, canvasHeight) / 2 - 40; // Радиус диаграммы
+    const centerX = canvasWidth / 2; // Центр по X
+    const centerY = canvasHeight / 2; // Центр по Y
+
+    // Рисуем круговую диаграмму
+    labelsInput.forEach((label, index) => {
+        const value = categoryValues[index];
+        const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
+
+        // Рисуем сегмент
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY); // Перемещаемся в центр
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle); // Рисуем дугу
+        ctx.closePath();
+        ctx.fillStyle = colors[index % colors.length]; // Выбор цвета
+        ctx.fill(); // Заполняем цветом
+
+        // Отмечаем угол для следующего сегмента
+        startAngle += sliceAngle;
+    });
+
+    // Добавляем подписи к сегментам
+    startAngle = 0;
+    labelsInput.forEach((label, index) => {
+        const value = categoryValues[index];
+        const sliceAngle = (value / total) * 2 * Math.PI; // Угол для текущего сегмента
+        const midAngle = startAngle + sliceAngle / 2; // Средний угол
+
+        // Позиция для текста
+        const labelX = centerX + (radius / 2) * Math.cos(midAngle);
+        const labelY = centerY + (radius / 2) * Math.sin(midAngle);
+
+        ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+        ctx.textAlign = 'center';
+        ctx.font = '12px Arial'; // Устанавливаем размер и тип шрифта
+        ctx.fillText(`${labelsInputY[index]}: ${value}`, labelX, labelY); // Подпись с значением
+
+        startAngle += sliceAngle; // Переходим к следующему сегменту
+    });
+
+    // Добавляем заголовок
+    ctx.fillStyle = isDarkMode ? 'white' : 'black'; // Цвет текста
+    ctx.textAlign = 'center';
+    ctx.font = '20px Arial'; // Шрифт заголовка
+    ctx.fillText(`Data for ${labelsInput[0]}`, centerX, 30); // Заголовок диаграммы
 }
 
 function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
@@ -698,10 +766,12 @@ function drawGraph(xAxis, labelsInput, labelsInputY, valuesInput, chartType) {
     // В зависимости от типа графика вызываем нужную функцию
     if (chartType === 'bar') {
         drawBarChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+        isChart = true;
     } else if (chartType === 'line') {
         drawLineChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+        isChart = true;
     } else if (chartType === 'pie') {
-        drawPieChart(ctx, xAxis, labelsInput, labelsInputY, valuesInput);
+        drawPieChart(ctx, 0, labelsInput, labelsInputY, valuesInput);
+        isChart = true;
     }
-    isChart = true;
 }
